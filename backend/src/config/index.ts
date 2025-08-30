@@ -6,30 +6,30 @@ dotenv.config();
 
 // Configuration de l'application
 export const config: AppConfig = {
-  port: parseInt(process.env.PORT || '3001'),
-  node_env: process.env.NODE_ENV || 'development',
+  port: parseInt(process.env['PORT'] || '3001'),
+  node_env: process.env['NODE_ENV'] || 'development',
   
   database: {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'gestion_reclamation',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || '',
-    ssl: process.env.NODE_ENV === 'production'
+    host: process.env['DB_HOST'] || 'localhost',
+    port: parseInt(process.env['DB_PORT'] || '5432'),
+    database: process.env['DB_NAME'] || 'gestion_reclamation',
+    user: process.env['DB_USER'] || 'postgres',
+    password: process.env['DB_PASSWORD'] || '',
+    ssl: process.env['NODE_ENV'] === 'production'
   },
   
   jwt: {
-    secret: process.env.JWT_SECRET || 'default_jwt_secret_change_in_production',
-    refresh_secret: process.env.JWT_REFRESH_SECRET || 'default_refresh_secret_change_in_production',
-    expires_in: process.env.JWT_EXPIRES_IN || '15m',
-    refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
+    secret: process.env['JWT_SECRET'] || 'default_jwt_secret_change_in_production',
+    refresh_secret: process.env['JWT_REFRESH_SECRET'] || 'default_refresh_secret_change_in_production',
+    expires_in: process.env['JWT_EXPIRES_IN'] || '15m',
+    refresh_expires_in: process.env['JWT_REFRESH_EXPIRES_IN'] || '7d'
   },
   
-  bcrypt_rounds: parseInt(process.env.BCRYPT_ROUNDS || '12'),
+  bcrypt_rounds: parseInt(process.env['BCRYPT_ROUNDS'] || '12'),
   
   rate_limit: {
-    window_ms: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-    max_requests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100')
+    window_ms: parseInt(process.env['RATE_LIMIT_WINDOW_MS'] || '900000'), // 15 minutes
+    max_requests: parseInt(process.env['RATE_LIMIT_MAX_REQUESTS'] || '100')
   }
 };
 
@@ -68,7 +68,7 @@ export const isTest = config.node_env === 'test';
 export const corsOptions = {
   origin: isDevelopment 
     ? ['http://localhost:3000', 'http://localhost:5173'] // Frontend dev
-    : process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [],
+    : process.env['FRONTEND_URL'] ? [process.env['FRONTEND_URL']] : [],
   credentials: true,
   optionsSuccessStatus: 200
 };

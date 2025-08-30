@@ -19,7 +19,7 @@ export const API_CONFIG = {
       BASE: '/users',
       ROLES: '/users/roles',
       DEPARTMENTS: '/users/departments',
-      ASSIGN_ROLE: (userId: string, roleId: string) => `/users/${userId}/roles`,
+      ASSIGN_ROLE: (userId: string) => `/users/${userId}/roles`,
       REMOVE_ROLE: (userId: string, roleId: string) => `/users/${userId}/roles/${roleId}`
     },
     

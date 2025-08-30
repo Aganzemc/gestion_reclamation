@@ -60,7 +60,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="votre.email@universite.fr"
+                placeholder="votre.email@universite.cd"
                 required
               />
             </div>
@@ -102,16 +102,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
               S'inscrire
             </button>
           </p>
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          {/* <p className="text-xs text-blue-800 text-center">
-            <strong>Comptes de test :</strong><br/>
-            Admin: admin@universite.fr<br/>
-            QA: qa@universite.fr<br/>
-            STO: sto@universite.fr<br/>
-            (Tout mot de passe)
-          </p> */}
         </div>
       </div>
     </div>
