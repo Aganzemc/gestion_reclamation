@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole } from '../types';
+import apiService from '../services/apiService';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (nom: string, email: string, password: string, role: UserRole) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (role: UserRole) => boolean;
 }
@@ -54,15 +55,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulation d'authentification
-    const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser && password) {
-      setUser(foundUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      return true;
+    try {
+      const response = await apiService.login({ email, password });
+      
+      if (response.success && response.data) {
+        // Convertir la réponse de l'API au format du frontend
+        const apiUser = response.data.user;
+        const frontendUser: User = {
+          id: apiUser.id.toString(),
+          nom: `${apiUser.prenom} ${apiUser.nom}`,
+          email: apiUser.email,
+          role: apiUser.roles.includes('ADMIN') ? UserRole.ADMIN :
+                apiUser.roles.includes('QA') ? UserRole.QA :
+                apiUser.roles.includes('STO') ? UserRole.STO : UserRole.VIEWER,
+          dateCreation: new Date(),
+          actif: true
+        };
+        
+        setUser(frontendUser);
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(frontendUser));
+        return true;
+      } else {
+        console.error('Erreur de connexion:', response.error?.message);
+        return false;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la connexion:', error);
+      return false;
     }
-    return false;
   };
 
   const register = async (nom: string, email: string, password: string, role: UserRole): Promise<boolean> => {
@@ -85,10 +106,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+    }
   };
 
   const hasRole = (role: UserRole): boolean => {
