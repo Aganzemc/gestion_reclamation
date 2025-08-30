@@ -39,17 +39,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h2>
           <p className="text-gray-600">Accédez à votre espace de gestion</p>
-          
-          {/* Informations sur les comptes de test */}
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800 font-medium mb-2">Comptes de test :</p>
-            <div className="text-xs text-blue-700 space-y-1">
-              <div><strong>Admin:</strong> admin@example.com / Admin123!</div>
-              <div><strong>QA:</strong> qa1@example.com / Qa123!</div>
-              <div><strong>STO:</strong> sto1@example.com / Sto123!</div>
-              <div><strong>Viewer:</strong> viewer1@example.com / Viewer123!</div>
-            </div>
-          </div>
         </div>
 
         {error && (
@@ -71,7 +60,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="votre.email@universite.fr"
+                placeholder="votre.email@universite.cd"
                 required
               />
             </div>
@@ -113,16 +102,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
               S'inscrire
             </button>
           </p>
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          {/* <p className="text-xs text-blue-800 text-center">
-            <strong>Comptes de test :</strong><br/>
-            Admin: admin@universite.fr<br/>
-            QA: qa@universite.fr<br/>
-            STO: sto@universite.fr<br/>
-            (Tout mot de passe)
-          </p> */}
         </div>
       </div>
     </div>

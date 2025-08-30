@@ -1,7 +1,7 @@
 // Configuration de l'API backend
 export const API_CONFIG = {
   // URL de base de l'API
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+  BASE_URL: import.meta.env.VITE_REACT_APP_API_URL || 'http://localhost:3001',
   
   // Endpoints de l'API
   ENDPOINTS: {
@@ -19,7 +19,7 @@ export const API_CONFIG = {
       BASE: '/users',
       ROLES: '/users/roles',
       DEPARTMENTS: '/users/departments',
-      ASSIGN_ROLE: (userId: string, roleId: string) => `/users/${userId}/roles`,
+      ASSIGN_ROLE: (userId: string) => `/users/${userId}/roles`,
       REMOVE_ROLE: (userId: string, roleId: string) => `/users/${userId}/roles/${roleId}`
     },
     

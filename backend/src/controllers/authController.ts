@@ -36,7 +36,18 @@ export class AuthController {
       }
       
       // Récupérer l'adresse IP du client
-      const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
+      let ipAddress: string | undefined;
+      if (typeof req.ip === 'string') {
+        ipAddress = req.ip;
+      } else if (typeof req.connection?.remoteAddress === 'string') {
+        ipAddress = req.connection.remoteAddress;
+      } else if (typeof req.headers['x-forwarded-for'] === 'string') {
+        ipAddress = req.headers['x-forwarded-for'];
+      } else if (Array.isArray(req.headers['x-forwarded-for'])) {
+        ipAddress = req.headers['x-forwarded-for'][0];
+      } else {
+        ipAddress = undefined;
+      }
       
       // Authentifier l'utilisateur
       const loginResult = await AuthService.login({ email, password }, ipAddress);

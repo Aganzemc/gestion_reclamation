@@ -95,10 +95,10 @@ export class UserController {
       }
       
       // Paramètres de pagination
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const sortBy = req.query.sort_by as string || 'created_at';
-      const sortOrder = (req.query.sort_order as string) || 'DESC';
+    const page = parseInt(req.query['page'] as string) || 1;
+    const limit = parseInt(req.query['limit'] as string) || 10;
+    const sortBy = req.query['sort_by'] as string || 'created_at';
+    const sortOrder = (req.query['sort_order'] as string) || 'DESC';
       
       // Validation des paramètres
       if (page < 1 || limit < 1 || limit > 100) {
@@ -124,27 +124,24 @@ export class UserController {
       // Filtres
       const filters: UserFilters = {};
       
-      if (req.query.status) {
-        filters.status = req.query.status as any;
-      }
-      
-      if (req.query.roles) {
-        const roles = Array.isArray(req.query.roles) 
-          ? req.query.roles as string[]
-          : [req.query.roles as string];
-        filters.roles = roles;
-      }
-      
-      if (req.query.departments) {
-        const departments = Array.isArray(req.query.departments)
-          ? req.query.departments as string[]
-          : [req.query.departments as string];
-        filters.departments = departments;
-      }
-      
-      if (req.query.search) {
-        filters.search = req.query.search as string;
-      }
+    if (req.query['status']) {
+      filters.status = req.query['status'] as any;
+    }
+    if (req.query['roles']) {
+      const roles = Array.isArray(req.query['roles'])
+        ? req.query['roles'] as string[]
+        : [req.query['roles'] as string];
+      filters.roles = roles;
+    }
+    if (req.query['departments']) {
+      const departments = Array.isArray(req.query['departments'])
+        ? req.query['departments'] as string[]
+        : [req.query['departments'] as string];
+      filters.departments = departments;
+    }
+    if (req.query['search']) {
+      filters.search = req.query['search'] as string;
+    }
       
       // Récupérer les utilisateurs
       const users = await UserService.getUsers(pagination, filters);
@@ -537,8 +534,8 @@ export class UserController {
         return;
       }
       
-      const userId = parseInt(req.params.id);
-      const roleId = parseInt(req.params.roleId);
+      const userId = parseInt(req.params['id']);
+      const roleId = parseInt(req.params['roleId']);
       
       if (isNaN(userId) || isNaN(roleId)) {
         res.status(400).json({
