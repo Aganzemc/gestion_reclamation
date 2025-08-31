@@ -1,5 +1,13 @@
 import winston from 'winston';
+import path from 'path';
+import fs from 'fs';
 import { config, isDevelopment } from '../config';
+
+// Créer le dossier logs s'il n'existe pas
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
 
 // Configuration des formats de log
 const logFormat = winston.format.combine(
@@ -60,7 +68,7 @@ if (isDevelopment) {
 
 // Création du logger principal
 const logger = winston.createLogger({
-  level: config.logConfig.level,
+  level: isDevelopment ? 'debug' : 'info',
   format: logFormat,
   defaultMeta: { service: 'gestion-reclamation-api' },
   transports,

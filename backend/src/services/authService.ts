@@ -245,7 +245,7 @@ export class AuthService {
    * Récupère un utilisateur avec ses rôles et départements
    */
   private static async getUserWithRoles(userId: number): Promise<UserWithRoles> {
-    const users = await query(
+    const users = await query<any>(
       `SELECT 
         u.id, u.email, u.first_name, u.last_name, u.status, 
         u.created_at, u.updated_at, u.last_login_at, u.email_verified,

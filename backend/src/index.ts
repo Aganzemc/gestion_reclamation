@@ -3,10 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { config, validateConfig, corsOptions, logConfig } from './config';
+import { config, validateConfig, corsOptions } from './config';
 import { testConnection, closePool } from './database/connection';
-import logger from './utils/logger';
-import { logRequest } from './utils/logger';
+import logger, { logRequest } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 
@@ -63,7 +62,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Logging des requêtes HTTP
-app.use(morgan(logConfig.format, {
+app.use(morgan('combined', {
   stream: {
     write: (message: string) => {
       logger.info(message.trim());

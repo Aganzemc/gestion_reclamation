@@ -78,3 +78,14 @@ export const logConfig = {
   level: isDevelopment ? 'debug' : 'info',
   format: isDevelopment ? 'dev' : 'combined'
 };
+
+// Fonction pour créer le dossier logs s'il n'existe pas
+export const ensureLogsDirectory = () => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  const logsDir = path.join(process.cwd(), 'logs');
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+};
