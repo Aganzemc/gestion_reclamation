@@ -17,6 +17,39 @@ import { logAuditEvent } from '../utils/logger';
 export class UserService {
   
   /**
+   * Récupère un utilisateur avec ses rôles et départements
+   */
+  private static async getUserWithRoles(userId: number): Promise<UserWithRoles> {
+    const users = await query<any>(
+      `SELECT 
+        u.id, u.email, u.first_name, u.last_name, u.status, 
+        u.created_at, u.updated_at, u.last_login_at, u.email_verified,
+        array_agg(DISTINCT r.code) FILTER (WHERE r.code IS NOT NULL) as roles,
+        array_agg(DISTINCT d.name) FILTER (WHERE d.name IS NOT NULL) as departments
+      FROM users u
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      LEFT JOIN user_departments ud ON u.id = ud.user_id
+      LEFT JOIN departments d ON ud.department_id = d.id
+      WHERE u.id = $1
+      GROUP BY u.id, u.email, u.first_name, u.last_name, u.status, 
+               u.created_at, u.updated_at, u.last_login_at, u.email_verified`,
+      [userId]
+    );
+    
+    if (users.length === 0) {
+      throw new Error('Utilisateur non trouvé');
+    }
+    
+    const user = users[0];
+    return {
+      ...user,
+      roles: user.roles || [],
+      departments: user.departments || []
+    };
+  }
+  
+  /**
    * Crée un nouvel utilisateur
    */
   static async createUser(userData: UserCreate, createdBy: number): Promise<UserWithRoles> {
