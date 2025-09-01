@@ -8,6 +8,9 @@ import { testConnection, closePool } from './database/connection';
 import logger, { logRequest } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
+import notificationRoutes from './routes/notificationRoutes';
+import ticketRoutes from './routes/ticketRoutes';
+import assignmentRoutes from './routes/assignmentRoutes';
 
 // Validation de la configuration
 validateConfig();
@@ -97,7 +100,7 @@ app.use('*', (req, res) => {
 });
 
 // Gestionnaire d'erreurs global
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Erreur non gérée:', {
     error: error.message,
     stack: error.stack,
@@ -122,7 +125,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
 // =====================================================
 
 // Route de santé (health check)
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     success: true,
     message: 'API de gestion des réclamations opérationnelle',
@@ -137,6 +140,15 @@ app.use('/auth', authRoutes);
 
 // Routes des utilisateurs
 app.use('/users', userRoutes);
+
+// Routes des notifications
+app.use('/notifications', notificationRoutes);
+
+// Routes des tickets
+app.use('/tickets', ticketRoutes);
+
+// Routes des assignations
+app.use('/assignments', assignmentRoutes);
 
 // =====================================================
 // Démarrage du serveur
@@ -193,7 +205,7 @@ async function startServer() {
       gracefulShutdown('uncaughtException');
     });
     
-    process.on('unhandledRejection', (reason, promise) => {
+    process.on('unhandledRejection', (reason, _promise) => {
       logger.error('❌ Rejet de promesse non géré:', reason);
       gracefulShutdown('unhandledRejection');
     });

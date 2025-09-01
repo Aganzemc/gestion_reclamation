@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '../services/authService';
+import { authService } from '../services/authServices';
 import { JwtPayload } from '../types';
 import logger from '../utils/logger';
 import { logSecurityEvent } from '../utils/logger';
@@ -16,68 +16,50 @@ declare global {
 /**
  * Middleware d'authentification JWT
  */
-export const authenticateToken = async (
-  req: Request, 
-  res: Response, 
-  next: NextFunction
-): Promise<void> => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
     
-    if (!token) {
-      logSecurityEvent('Tentative d\'accès sans token', {
-        ip: req.ip,
-        url: req.url,
-        method: req.method
-      });
-      
-      res.status(401).json({
-        success: false,
-        error: 'Token d\'accès requis',
-        code: 'TOKEN_REQUIRED'
-      });
-      return;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Token d\'accès requis' });
     }
-    
-    try {
-      // Vérifier et décoder le token
-      const decoded = AuthService.verifyToken(token);
-      req.user = decoded;
-      
-      // Logger l'accès authentifié
-      logger.debug('Accès authentifié', {
-        userId: decoded.user_id,
-        email: decoded.email,
-        roles: decoded.roles,
-        url: req.url,
-        method: req.method
-      });
-      
-      next();
-      
-    } catch (tokenError) {
-      logSecurityEvent('Token invalide ou expiré', {
-        ip: req.ip,
-        url: req.url,
-        method: req.method,
-        error: tokenError instanceof Error ? tokenError.message : String(tokenError)
-      });
-      
-      res.status(401).json({
-        success: false,
-        error: 'Token invalide ou expiré',
-        code: 'TOKEN_INVALID'
-      });
+
+    const token = authHeader.substring(7);
+    const { isValid, user, sessionId } = await authService.verifyAuth(token);
+
+    if (!isValid || !user) {
+      return res.status(401).json({ error: 'Token invalide ou expiré' });
     }
-    
+
+    // Ajouter les informations d'authentification à la requête
+    (req as any).user = user;
+    (req as any).userId = user.id;
+    (req as any).sessionId = sessionId;
+
+    return next();
   } catch (error) {
-    logger.error('Erreur dans le middleware d\'authentification:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur interne du serveur',
-      code: 'INTERNAL_ERROR'
-    });
+    return res.status(401).json({ error: 'Erreur d\'authentification' });
+  }
+};
+
+export const optionalAuth = async (req: Request, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const { isValid, user, sessionId } = await authService.verifyAuth(token);
+
+      if (isValid && user) {
+        (req as any).user = user;
+        (req as any).userId = user.id;
+        (req as any).sessionId = sessionId;
+      }
+    }
+
+    next();
+  } catch (error) {
+    next();
   }
 };
 
@@ -234,7 +216,7 @@ function checkPermission(
   // Vérifications contextuelles spéciales
   if (resource === 'tickets' && action === 'update') {
     // Un utilisateur peut modifier ses propres tickets
-    const ticketId = req.params.id || req.body.ticket_id;
+    const ticketId = req.params['id'] || req.body.ticket_id;
     if (ticketId && req.user) {
       // Vérifier si l'utilisateur est le créateur du ticket
       // Cette logique sera implémentée dans le service
@@ -260,7 +242,7 @@ export const requireOwnership = (resourceType: string) => {
         return;
       }
       
-      const resourceId = req.params.id;
+      const resourceId = req.params['id'];
       if (!resourceId) {
         res.status(400).json({
           success: false,
@@ -311,9 +293,9 @@ export const requireOwnership = (resourceType: string) => {
  * Vérifie si un utilisateur est propriétaire d'une ressource
  */
 async function checkResourceOwnership(
-  resourceType: string, 
-  resourceId: number, 
-  userId: number
+  _resourceType: string, 
+  _resourceId: number, 
+  _userId: number
 ): Promise<boolean> {
   try {
     // Cette fonction sera implémentée selon le type de ressource

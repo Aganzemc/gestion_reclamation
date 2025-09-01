@@ -45,14 +45,6 @@ export interface Ticket {
   createur: User;
   dateCreation: Date;
   dateCloture?: Date;
-  commentaires: Comment[];
-}
-
-export interface Comment {
-  id: string;
-  auteur: User;
-  contenu: string;
-  date: Date;
 }
 
 export interface KPIData {
