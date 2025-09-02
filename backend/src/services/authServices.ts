@@ -49,8 +49,8 @@ export const authService = {
         userId,
         token,
         refreshToken,
-        userAgent,
-        ipAddress,
+        userAgent: userAgent ?? null,
+        ipAddress: ipAddress ?? null,
         expiresAt
       }
     });
@@ -79,7 +79,7 @@ export const authService = {
   async isValidSession(sessionId: string, _token: string): Promise<boolean> {
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
-      select: { revokedAt: null, expiresAt: true }
+      select: { revokedAt: true, expiresAt: true }
     });
 
     if (!session || session.revokedAt || new Date() > session.expiresAt) {

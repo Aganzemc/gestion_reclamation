@@ -70,16 +70,18 @@ const TicketList: React.FC = () => {
     }
   };
 
-  const filteredTickets = tickets.filter(ticket => {
-    return (
-      (!filters.search || 
-        ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        ticket.id?.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.status || ticket.status === filters.status) &&
-      (!filters.type || ticket.type === filters.type) &&
-      (!filters.priority || ticket.priority === filters.priority)
-    );
-  });
+  const filteredTickets = Array.isArray(tickets)
+  ? tickets.filter(ticket => {
+      return (
+        (!filters.search ||
+          ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          ticket.id?.toLowerCase().includes(filters.search.toLowerCase())) &&
+        (!filters.status || ticket.status === filters.status) &&
+        (!filters.type || ticket.type === filters.type) &&
+        (!filters.priority || ticket.priority === filters.priority)
+      );
+    })
+  : [];
 
   return (
     <div className="space-y-6">
@@ -217,7 +219,7 @@ const TicketList: React.FC = () => {
                     }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {ticket.createdAt?.toLocaleDateString('fr-FR')}
+                    {new Date(ticket.createdAt!).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">

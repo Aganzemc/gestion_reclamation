@@ -4,18 +4,20 @@ import axios from 'axios';
 import { Notification, NotificationType, User } from '../types/type';
 
 // Configuration Axios de base
-const api = axios.create({
-  baseURL: '/api/notifications',
-});
+// const api = axios.create({
+//   baseURL: '/api/notifications',
+// });
+
+const baseURL = "http://localhost:4000/api/notifications"; 
 
 // Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
 // Types étendus pour inclure les relations
 export type NotificationWithUser = Notification & {
@@ -63,7 +65,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getNotifications: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/');
+      const response = await axios.get(`${baseURL}/`);
       set({ notifications: response.data, loading: false });
     } catch (error: any) {
       set({ 
@@ -76,7 +78,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getNotificationById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/${id}`);
+      const response = await axios.get(`${baseURL}/${id}`);
       const notification = response.data;
       set({ currentNotification: notification, loading: false });
       return notification;
@@ -92,7 +94,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   createNotification: async (notificationData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/', notificationData);
+      const response = await axios.post(`${baseURL}/`, notificationData);
       const newNotification = response.data;
       
       set((state) => ({
@@ -119,7 +121,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   updateNotification: async (id: string, notificationData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.put(`/${id}`, notificationData);
+      const response = await axios.put(`${baseURL}/${id}`, notificationData);
       const updatedNotification = response.data;
       
       set((state) => ({
@@ -149,7 +151,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   deleteNotification: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/${id}`);
+      await axios.delete(`${baseURL}/${id}`);
       
       set((state) => {
         const deletedNotification = state.userNotifications.find(n => n.id === id);
@@ -175,7 +177,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getUserNotifications: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/user/${userId}`);
+      const response = await axios.get(`${baseURL}/user/${userId}`);
       const notifications = response.data;
       
       // Calculer le nombre de notifications non lues
@@ -200,7 +202,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAsRead: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.patch(`/${id}/read`);
+      const response = await axios.patch(`${baseURL}/${id}/read`);
       const updatedNotification = response.data;
       
       set((state) => ({
@@ -228,7 +230,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAsUnread: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.patch(`/${id}/unread`);
+      const response = await axios.patch(`${baseURL}/${id}/unread`);
       const updatedNotification = response.data;
       
       set((state) => ({
@@ -256,7 +258,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAllAsRead: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      await api.patch('/read-all', { userId });
+      await axios.patch(`${baseURL}/read-all`, { userId });
       
       set((state) => ({
         notifications: state.notifications.map(notification => 
@@ -280,7 +282,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getUnreadCount: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/unread/count/${userId}`);
+      const response = await axios.get(`${baseURL}/unread/count/${userId}`);
       const count = response.data.count;
       
       set({ unreadCount: count, loading: false });
@@ -297,7 +299,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getNotificationStats: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/stats/notifications');
+      const response = await axios.get(`${baseURL}/stats/notifications`);
       const stats = response.data;
       set({ notificationStats: stats, loading: false });
       return stats;

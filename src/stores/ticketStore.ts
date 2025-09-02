@@ -4,18 +4,20 @@ import axios from 'axios';
 import { Ticket, TicketStatus, TicketPriority, TicketType, TicketAssignment } from '../types/type';
 
 // Configuration Axios de base
-const api = axios.create({
-  baseURL: '/api/tickets',
-});
+// const api = axios.create({
+//   baseURL: '/api/tickets',
+// });
+
+const baseURL = "http://localhost:4000/api/tickets"; 
 
 // Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
 interface TicketState {
   tickets: Ticket[];
@@ -53,8 +55,8 @@ export const useTicketStore = create<TicketState>((set) => ({
   getTickets: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/');
-      set({ tickets: response.data, loading: false });
+      const response = await axios.get(`${baseURL}/`);
+      set({ tickets: response.data.tickets, loading: false });
     } catch (error: any) {
       set({ 
         error: error.response?.data?.message || 'Erreur lors de la récupération des tickets',
@@ -66,7 +68,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   getTicketById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/${id}`);
+      const response = await axios.get(`${baseURL}/${id}`);
       const ticket = response.data;
       set({ currentTicket: ticket, loading: false });
       return ticket;
@@ -82,7 +84,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   createTicket: async (ticketData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/', ticketData);
+      const response = await axios.post(`${baseURL}/`, ticketData);
       const newTicket = response.data;
       
       set((state) => ({
@@ -103,7 +105,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   updateTicket: async (id: string, ticketData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.put(`/${id}`, ticketData);
+      const response = await axios.put(`${baseURL}/${id}`, ticketData);
       const updatedTicket = response.data;
       
       set((state) => ({
@@ -130,7 +132,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   deleteTicket: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/${id}`);
+      await axios.delete(`${baseURL}/${id}`);
       
       set((state) => ({
         tickets: state.tickets.filter(ticket => ticket.id !== id),
@@ -150,7 +152,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   updateTicketStatus: async (id: string, status: TicketStatus) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.patch(`/${id}/status`, { status });
+      const response = await axios.patch(`${baseURL}/${id}/status`, { status });
       const updatedTicket = response.data;
       
       set((state) => ({
@@ -177,7 +179,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   getUserTickets: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/user/${userId}`);
+      const response = await axios.get(`${baseURL}/user/${userId}`);
       set({ userTickets: response.data, loading: false });
     } catch (error: any) {
       set({ 
@@ -190,7 +192,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   getTicketAssignments: async (ticketId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/${ticketId}/assignments`);
+      const response = await axios.get(`${baseURL}/${ticketId}/assignments`);
       set({ loading: false });
       return response.data;
     } catch (error: any) {
@@ -205,7 +207,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   createAssignment: async (ticketId: string, userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post(`/${ticketId}/assignments`, { userId });
+      const response = await axios.post(`${baseURL}/${ticketId}/assignments`, { userId });
       const newAssignment = response.data;
       
       // Mettre à jour le ticket courant avec la nouvelle assignation
@@ -235,7 +237,7 @@ export const useTicketStore = create<TicketState>((set) => ({
   deleteAssignment: async (ticketId: string, assignmentId: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/${ticketId}/assignments/${assignmentId}`);
+      await axios.delete(`${baseURL}/${ticketId}/assignments/${assignmentId}`);
       
       // Mettre à jour le ticket courant en supprimant l'assignation
       set((state) => {

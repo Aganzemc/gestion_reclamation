@@ -1,7 +1,8 @@
 import winston from 'winston';
 import path from 'path';
 import fs from 'fs';
-import { config, isDevelopment } from '../config';
+
+let isDevelopment = process.env['NODE_ENV'] !== 'production';
 
 // Créer le dossier logs s'il n'existe pas
 const logsDir = path.join(process.cwd(), 'logs');
@@ -57,14 +58,14 @@ const transports: winston.transport[] = [
 ];
 
 // Ajouter la console en développement
-if (isDevelopment) {
-  transports.push(
-    new winston.transports.Console({
-      format: consoleFormat,
-      level: 'debug'
-    })
-  );
-}
+// if (isDevelopment) {
+//   transports.push(
+//     new winston.transports.Console({
+//       format: consoleFormat,
+//       level: 'debug'
+//     })
+//   );
+// }
 
 // Création du logger principal
 const logger = winston.createLogger({

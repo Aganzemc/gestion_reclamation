@@ -37,7 +37,7 @@ export const userController = {
   },
 
   // Obtenir tous les utilisateurs
-  async getUsers(res: Response) {
+  async getUsers(req: Request, res: Response) {
     try {
       const users = await prisma.user.findMany({
         select: {
@@ -52,9 +52,9 @@ export const userController = {
         orderBy: { createdAt: 'desc' }
       });
       
-      res.json(users);
+      return res.json(users);
     } catch (error) {
-      res.status(500).json({ error: 'Erreur serveur' });
+      return res.status(500).json({ error: 'Erreur serveur' });
     }
   },
 

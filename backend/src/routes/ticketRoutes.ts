@@ -2,14 +2,14 @@
 import express from 'express';
 import { ticketController } from '../controllers/ticket.controller';
 import { authenticate } from '../middleware/auth';
-import { assignmentController } from '@/controllers/assignmentController';
+import { assignmentController } from '../controllers/assignmentController';
 
 const router = express.Router();
-
-router.get('/', authenticate, ticketController.getTickets);
-router.post('/', authenticate, ticketController.createTicket);
-router.get('/:id', authenticate, ticketController.getTicketById);
-router.put('/:id', authenticate, ticketController.updateTicket);
+// authenticate 
+router.get('/', ticketController.getTickets);
+router.post('/', ticketController.createTicket);
+router.get('/:id', ticketController.getTicketById);
+router.put('/:id', ticketController.updateTicket);
 router.delete('/:id', authenticate, ticketController.deleteTicket);
 router.patch('/:id/status', authenticate, ticketController.updateTicketStatus);
 router.get('/user/:userId', authenticate, ticketController.getUserTickets);

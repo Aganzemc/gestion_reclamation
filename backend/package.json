@@ -7,7 +7,6 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "db:migrate": "psql -U postgres -d gestion_reclamation -f migrations/init.sql",
     "db:seed": "ts-node src/scripts/seed.ts"
   },
   "dependencies": {
@@ -39,6 +38,7 @@
     "nodemon": "^3.0.2",
     "prisma": "^6.15.0",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.2"
   },
   "keywords": [

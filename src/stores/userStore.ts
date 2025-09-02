@@ -4,18 +4,20 @@ import axios from 'axios';
 import { User, UserRole, UserStatus } from '../types/type';
 
 // Configuration Axios de base
-const api = axios.create({
-  baseURL: '/api/users',
-});
+// const api = axios.create({
+//   baseURL: '/api/users',
+// });
+
+const baseURL = "http://localhost:4000/api/users"; 
 
 // Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
 interface UserState {
   users: User[];
@@ -42,7 +44,7 @@ export const useUserStore = create<UserState>((set) => ({
   getUsers: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/');
+      const response = await axios.get(`${baseURL}/`);
       set({ users: response.data, loading: false });
     } catch (error: any) {
       set({ 
@@ -55,7 +57,7 @@ export const useUserStore = create<UserState>((set) => ({
   getUserById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/${id}`);
+      const response = await axios.get(`${baseURL}/${id}`);
       set({ loading: false });
       return response.data;
     } catch (error: any) {
@@ -70,7 +72,7 @@ export const useUserStore = create<UserState>((set) => ({
   createUser: async (userData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/', userData);
+      const response = await axios.post(`${baseURL}/`, userData);
       const newUser = response.data;
       
       set((state) => ({
@@ -91,7 +93,7 @@ export const useUserStore = create<UserState>((set) => ({
   updateUser: async (id: string, userData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.put(`/${id}`, userData);
+      const response = await axios.put(`${baseURL}/${id}`, userData);
       const updatedUser = response.data;
       
       set((state) => ({
@@ -115,7 +117,7 @@ export const useUserStore = create<UserState>((set) => ({
   deleteUser: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/${id}`);
+      await axios.delete(`${baseURL}/${id}`);
       
       set((state) => ({
         users: state.users.filter(user => user.id !== id),

@@ -176,7 +176,7 @@ export const notificationController = {
       
       // Vérifier que l'utilisateur existe
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId! }
       });
       
       if (!user) {
@@ -308,7 +308,7 @@ export const notificationController = {
       
       // Vérifier que l'utilisateur existe
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId! }
       });
       
       if (!user) {
@@ -317,7 +317,7 @@ export const notificationController = {
       
       const count = await prisma.notification.count({
         where: { 
-          userId,
+          userId: userId!,
           isRead: false 
         }
       });

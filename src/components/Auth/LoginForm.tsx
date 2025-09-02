@@ -11,7 +11,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login: signin } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +19,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await signin(email, password);
+      console.log('Login attempt:', { email, password });
+      console.log('Login success:', success);
       if (!success) {
         setError('Email ou mot de passe incorrect');
       }

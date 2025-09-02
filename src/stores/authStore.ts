@@ -4,52 +4,54 @@ import axios from 'axios';
 import { User, UserRole } from '../types/type';
 
 // Configuration Axios de base
-const api = axios.create({
-  baseURL: '/api/auth',
-});
+// const api = axios.create({
+//   baseURL: '/api/auth',
+// });
+
+const baseURL = "http://localhost:4000/api/auth"; 
 
 // Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
-// Intercepteur pour gérer les tokens expirés
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+// // Intercepteur pour gérer les tokens expirés
+// api.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
       
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post('/api/auth/refresh-token', { refreshToken });
-          const { token, refreshToken: newRefreshToken } = response.data;
+//       try {
+//         const refreshToken = localStorage.getItem('refreshToken');
+//         if (refreshToken) {
+//           const response = await axios.post('/api/auth/refresh-token', { refreshToken });
+//           const { token, refreshToken: newRefreshToken } = response.data;
           
-          localStorage.setItem('authToken', token);
-          localStorage.setItem('refreshToken', newRefreshToken);
+//           localStorage.setItem('authToken', token);
+//           localStorage.setItem('refreshToken', newRefreshToken);
           
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // Si le refresh token échoue, déconnecter l'utilisateur
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
+//           originalRequest.headers.Authorization = `Bearer ${token}`;
+//           return api(originalRequest);
+//         }
+//       } catch (refreshError) {
+//         // Si le refresh token échoue, déconnecter l'utilisateur
+//         localStorage.removeItem('authToken');
+//         localStorage.removeItem('refreshToken');
+//         window.location.href = '/login';
+//         return Promise.reject(refreshError);
+//       }
+//     }
     
-    return Promise.reject(error);
-  }
-);
+//     return Promise.reject(error);
+//   }
+// );
 
 interface AuthState {
   user: User | null;
@@ -85,7 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (userData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/register', userData);
+      const response = await axios.post(`${baseURL}/register`, userData);
       const user = response.data;
       
       set({ loading: false });
@@ -100,8 +102,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/login', credentials);
-      const { user, token, refreshToken } = response.data;
+      console.log("credentials", credentials)
+      const response = await axios.post(`${baseURL}/login`, credentials);
+      const { user, token, refreshToken } = response.data.data;
       
       // Stocker les tokens dans le localStorage
       localStorage.setItem('authToken', token);
@@ -126,7 +129,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ loading: true, error: null });
     try {
-      await api.post('/logout');
+      await axios.post(`${baseURL}/logout`);
       
       // Supprimer les tokens du localStorage
       localStorage.removeItem('authToken');
@@ -157,7 +160,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logoutAll: async () => {
     set({ loading: true, error: null });
     try {
-      await api.post('/logout-all');
+      await axios.post(`${baseURL}/logout-all`);
       
       // Supprimer les tokens du localStorage
       localStorage.removeItem('authToken');
@@ -194,7 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw new Error('Aucun refresh token disponible');
       }
       
-      const response = await api.post('/refresh-token', { refreshToken });
+      const response = await axios.post(`${baseURL}/refresh-token`, { refreshToken });
       const { token: newToken, refreshToken: newRefreshToken } = response.data;
       
       // Mettre à jour les tokens dans le localStorage
@@ -224,7 +227,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   verify: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/verify');
+      const response = await axios.get(`${baseURL}/verify`);
       const isValid = response.data.valid;
       
       set({ loading: false });
@@ -238,7 +241,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   getProfile: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/profile');
+      const response = await axios.get(`${baseURL}/profile`);
       const user = response.data;
       
       set({ user, loading: false });

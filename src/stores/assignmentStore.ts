@@ -4,18 +4,20 @@ import axios from 'axios';
 import { Ticket, TicketAssignment, User } from '../types/type';
 
 // Configuration Axios de base
-const api = axios.create({
-  baseURL: '/api/assignments',
-});
+// const api = axios.create({
+//   baseURL: '/api/assignments',
+// });
+
+const baseURL = "http://localhost:4000/api/assignments";
 
 // Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem('authToken');
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
 // Types étendus pour inclure les relations
 export type AssignmentWithRelations = TicketAssignment & {
@@ -61,7 +63,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getAssignments: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/');
+      const response = await axios.get(`${baseURL}/`);
       set({ assignments: response.data, loading: false });
     } catch (error: any) {
       set({ 
@@ -74,7 +76,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getAssignmentById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/${id}`);
+      const response = await axios.get(`${baseURL}/${id}`);
       const assignment = response.data;
       set({ currentAssignment: assignment, loading: false });
       return assignment;
@@ -90,7 +92,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   createAssignment: async (assignmentData) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.post('/', assignmentData);
+      const response = await axios.post(`${baseURL}/`, assignmentData);
       const newAssignment = response.data;
       
       set((state) => ({
@@ -111,7 +113,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   deleteAssignment: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/${id}`);
+      await axios.delete(`${baseURL}/${id}`);
       
       set((state) => ({
         assignments: state.assignments.filter(assignment => assignment.id !== id),
@@ -132,7 +134,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getTicketAssignments: async (ticketId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/ticket/${ticketId}`);
+      const response = await axios.get(`${baseURL}/ticket/${ticketId}`);
       const assignments = response.data;
       set({ ticketAssignments: assignments, loading: false });
       return assignments;
@@ -148,7 +150,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getUserAssignments: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/user/${userId}`);
+      const response = await axios.get(`${baseURL}/user/${userId}`);
       const assignments = response.data;
       set({ userAssignments: assignments, loading: false });
       return assignments;
@@ -164,7 +166,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   removeUserFromTicket: async (ticketId: string, userId: string) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/ticket/${ticketId}/user/${userId}`);
+      await axios.delete(`${baseURL}/ticket/${ticketId}/user/${userId}`);
       
       set((state) => ({
         assignments: state.assignments.filter(
@@ -190,7 +192,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getAssignmentStats: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get('/stats/assignments');
+      const response = await axios.get(`${baseURL}/stats/assignments`);
       const stats = response.data;
       set({ assignmentStats: stats, loading: false });
       return stats;

@@ -29,7 +29,7 @@
     ],
     "types": ["node", "express"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["*"]
     },
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,

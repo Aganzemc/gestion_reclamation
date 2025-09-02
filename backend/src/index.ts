@@ -1,19 +1,14 @@
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import { config, validateConfig, corsOptions } from './config';
-import { testConnection, closePool } from './database/connection';
+import { testConnection, closePool } from "./lib/prisma";
 import logger, { logRequest } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import notificationRoutes from './routes/notificationRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import assignmentRoutes from './routes/assignmentRoutes';
-
-// Validation de la configuration
-validateConfig();
 
 // Création de l'application Express
 const app = express();
@@ -35,34 +30,48 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
+// Définir les options CORS
+const corsOptions: CorsOptions = {
+  origin: ["http://localhost:5173"], // liste des domaines autorisés (ex: ton frontend React/Next.js)
+  methods: ["GET", "POST", "PUT", "DELETE"], // méthodes autorisées
+  allowedHeaders: ["Content-Type", "Authorization"], // headers autorisés
+  credentials: true, // autorise cookies / authentification
+};
+
 // CORS
 app.use(cors(corsOptions));
 
-// Limitation de taux (rate limiting)
-const limiter = rateLimit({
-  windowMs: config.rate_limit.window_ms,
-  max: config.rate_limit.max_requests,
-  message: {
-    success: false,
-    error: 'Trop de requêtes, veuillez réessayer plus tard',
-    code: 'RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req) => {
-    // Ne pas limiter les routes d'authentification
-    return req.path.startsWith('/auth/login') || req.path.startsWith('/auth/refresh');
-  }
-});
-app.use(limiter);
+// // Limitation de taux (rate limiting)
+// const limiter = rateLimit({
+//   windowMs: config.rate_limit.window_ms,
+//   max: config.rate_limit.max_requests,
+//   message: {
+//     success: false,
+//     error: 'Trop de requêtes, veuillez réessayer plus tard',
+//     code: 'RATE_LIMIT_EXCEEDED'
+//   },
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   skip: (req) => {
+//     // Ne pas limiter les routes d'authentification
+//     return req.path.startsWith('/auth/login') || req.path.startsWith('/auth/refresh');
+//   }
+// });
+// app.use(limiter);
 
 // =====================================================
 // Middleware de parsing et logging
 // =====================================================
 
 // Parser JSON avec limite de taille
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json());
+// app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// app.use(express.json());
+
+// app.get("/", (req, res) => {
+//   res.send("🚀 API avec CORS activé !");
+// });
 
 // Logging des requêtes HTTP
 app.use(morgan('combined', {
@@ -73,15 +82,56 @@ app.use(morgan('combined', {
   }
 }));
 
+// =====================================================
+// Routes de l'API
+// =====================================================
+
+// Route de santé (health check)
+app.get('/health', (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API de gestion des réclamations opérationnelle',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    environment: process.env["NODE_ENV"] || 'development'
+  });
+});
+
+// Routes d'authentification
+app.use('/api/auth', authRoutes);
+
+// Routes des utilisateurs
+app.use('/api/users', userRoutes);
+// app.get('/users', async (req, res) => {
+//   try {
+//     const users = await prisma.user.findMany({
+//       orderBy: { createdAt: 'desc' }
+//     });
+//     res.json(users);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erreur serveur' });
+//   }
+// });
+
+// Routes des notifications
+app.use('/api/notifications', notificationRoutes);
+
+// Routes des tickets
+app.use('/api/tickets', ticketRoutes);
+
+// Routes des assignations
+app.use('/api/assignments', assignmentRoutes);
+
 // Middleware de logging personnalisé
 app.use((req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     logRequest(req, res, duration);
   });
-  
+
   next();
 });
 
@@ -108,47 +158,17 @@ app.use((error: any, req: express.Request, res: express.Response, _next: express
     method: req.method,
     ip: req.ip
   });
-  
+
   // Ne pas exposer les détails de l'erreur en production
-  const isDevelopment = config.node_env === 'development';
-  
-  res.status(500).json({
-    success: false,
-    error: isDevelopment ? error.message : 'Erreur interne du serveur',
-    code: 'INTERNAL_ERROR',
-    ...(isDevelopment && { stack: error.stack })
-  });
+  // const isDevelopment = config.node_env === 'development';
+
+  // res.status(500).json({
+  //   success: false,
+  //   error: isDevelopment ? error.message : 'Erreur interne du serveur',
+  //   code: 'INTERNAL_ERROR',
+  //   ...(isDevelopment && { stack: error.stack })
+  // });
 });
-
-// =====================================================
-// Routes de l'API
-// =====================================================
-
-// Route de santé (health check)
-app.get('/health', (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'API de gestion des réclamations opérationnelle',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    environment: config.node_env
-  });
-});
-
-// Routes d'authentification
-app.use('/auth', authRoutes);
-
-// Routes des utilisateurs
-app.use('/users', userRoutes);
-
-// Routes des notifications
-app.use('/notifications', notificationRoutes);
-
-// Routes des tickets
-app.use('/tickets', ticketRoutes);
-
-// Routes des assignations
-app.use('/assignments', assignmentRoutes);
 
 // =====================================================
 // Démarrage du serveur
@@ -156,62 +176,35 @@ app.use('/assignments', assignmentRoutes);
 
 async function startServer() {
   try {
-    // Tester la connexion à la base de données
+    // Tester la connexion
     const dbConnected = await testConnection();
     if (!dbConnected) {
-      logger.error('Impossible de se connecter à la base de données. Arrêt du serveur.');
+      logger.error("Impossible de se connecter à la base de données. Arrêt du serveur.");
       process.exit(1);
     }
-    
-    // Démarrer le serveur
-    const server = app.listen(config.port, () => {
-      logger.info(`🚀 Serveur démarré sur le port ${config.port}`);
-      logger.info(`📊 Environnement: ${config.node_env}`);
-      logger.info(`🔗 URL: http://localhost:${config.port}`);
-      logger.info(`📚 Documentation API: http://localhost:${config.port}/docs`);
+
+    const server = app.listen(4000, () => {
+      logger.info(`🚀 Serveur démarré sur le port 4000`);
     });
-    
-    // Gestion gracieuse de l'arrêt
+
     const gracefulShutdown = async (signal: string) => {
       logger.info(`📴 Signal ${signal} reçu. Arrêt gracieux du serveur...`);
-      
+
       server.close(async () => {
-        logger.info('🔒 Serveur HTTP fermé');
-        
         try {
           await closePool();
-          logger.info('🗄️  Connexions à la base de données fermées');
           process.exit(0);
         } catch (error) {
-          logger.error('❌ Erreur lors de la fermeture des connexions DB:', error);
+          logger.error("❌ Erreur lors de la fermeture Prisma:", error);
           process.exit(1);
         }
       });
-      
-      // Forcer l'arrêt si le serveur ne se ferme pas dans les 30 secondes
-      setTimeout(() => {
-        logger.error('⏰ Arrêt forcé du serveur');
-        process.exit(1);
-      }, 30000);
     };
-    
-    // Écouter les signaux d'arrêt
-    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    
-    // Gestion des erreurs non capturées
-    process.on('uncaughtException', (error) => {
-      logger.error('❌ Exception non capturée:', error);
-      gracefulShutdown('uncaughtException');
-    });
-    
-    process.on('unhandledRejection', (reason, _promise) => {
-      logger.error('❌ Rejet de promesse non géré:', reason);
-      gracefulShutdown('unhandledRejection');
-    });
-    
+
+    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
   } catch (error) {
-    logger.error('❌ Erreur lors du démarrage du serveur:', error);
+    logger.error("❌ Erreur lors du démarrage du serveur:", error);
     process.exit(1);
   }
 }

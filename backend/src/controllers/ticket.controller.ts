@@ -85,15 +85,6 @@ export const ticketController = {
                 }
               }
             },
-            comments: {
-              take: 1,
-              orderBy: { createdAt: 'desc' },
-              select: {
-                id: true,
-                content: true,
-                createdAt: true
-              }
-            }
           },
           orderBy: { createdAt: 'desc' }
         }),
@@ -142,18 +133,6 @@ export const ticketController = {
                 }
               }
             }
-          },
-          comments: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true
-                }
-              }
-            },
-            orderBy: { createdAt: 'asc' }
           }
         }
       });

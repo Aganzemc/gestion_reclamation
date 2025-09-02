@@ -205,7 +205,7 @@ const UserManagement: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.createdAt!.toLocaleDateString('fr-FR')}
+                    {new Date(user.createdAt!).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button

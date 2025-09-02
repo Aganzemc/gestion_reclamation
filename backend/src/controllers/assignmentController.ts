@@ -207,7 +207,7 @@ export const assignmentController = {
       
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
-          where: { ticketId },
+          where: { ticketId: ticketId! },
           skip,
           take: Number(limit),
           include: {
@@ -224,7 +224,7 @@ export const assignmentController = {
           },
           orderBy: { assignedAt: 'desc' }
         }),
-        prisma.ticketAssignment.count({ where: { ticketId } })
+        prisma.ticketAssignment.count({ where: { ticketId: ticketId! } })
       ]);
       
       return res.json({
@@ -250,7 +250,7 @@ export const assignmentController = {
       
       // Vérifier que l'utilisateur existe
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId! }
       });
       
       if (!user) {
@@ -261,7 +261,7 @@ export const assignmentController = {
       
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
-          where: { userId },
+          where: { userId: userId! },
           skip,
           take: Number(limit),
           include: {
@@ -278,7 +278,7 @@ export const assignmentController = {
           },
           orderBy: { assignedAt: 'desc' }
         }),
-        prisma.ticketAssignment.count({ where: { userId } })
+        prisma.ticketAssignment.count({ where: { userId: userId! } })
       ]);
       
       return res.json({
@@ -305,8 +305,8 @@ export const assignmentController = {
       const assignment = await prisma.ticketAssignment.findUnique({
         where: {
           ticketId_userId: {
-            ticketId,
-            userId
+            ticketId: ticketId!,
+            userId: userId!
           }
         }
       });
@@ -346,24 +346,26 @@ export const assignmentController = {
         where,
         _count: {
           id: true
-        },
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true
-            }
-          }
         }
       });
-      
+
+      // Récupérer les informations utilisateur pour chaque userId
+      const userIds = stats.map((stat: any) => stat.userId);
+      const users = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, firstName: true, lastName: true }
+      });
+
       // Formater les résultats
-      const formattedStats = stats.map((stat: any) => ({
-        userId: stat.userId,
-        userName: `${stat.user.firstName} ${stat.user.lastName}`,
-        assignmentCount: stat._count.id
-      }));
-      
+      const formattedStats = stats.map((stat: any) => {
+        const user = users.find(u => u.id === stat.userId);
+        return {
+          userId: stat.userId,
+          userName: user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu',
+          assignmentCount: stat._count.id
+        };
+      });
+
       res.json({ stats: formattedStats });
     } catch (error) {
       console.error(error);
