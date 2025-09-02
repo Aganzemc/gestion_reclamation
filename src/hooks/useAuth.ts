@@ -1,7 +1,7 @@
 // hooks/useAuth.ts
 import { useAuthStore } from '../stores/authStore';
 
-export const useAuth = () => {
+export const useAuthentication = () => {
   const {
     user,
     token,

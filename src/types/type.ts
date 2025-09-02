@@ -47,15 +47,15 @@ export enum NotificationType {
 
 // Interfaces principales
 export interface User {
-  id: string;
+  id?: string;
   email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  status: UserStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
   tickets?: Ticket[];
   assignedTickets?: TicketAssignment[];
   notifications?: Notification[];

@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserRole } from '../types';
-import apiService from '../services/apiService';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuthentication } from '../hooks/useAuth';
+import { User, UserRole, UserStatus } from '../types/type';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (nom: string, email: string, password: string, role: UserRole) => Promise<boolean>;
+  register: (firstName: string, lastName: string, email: string, password: string, role: UserRole) => Promise<boolean>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   hasRole: (role: UserRole) => boolean;
@@ -14,36 +14,37 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Données simulées des utilisateurs
-const mockUsers: User[] = [
-  {
-    id: '1',
-    nom: 'Admin Principal',
-    email: 'admin@universite.fr',
-    role: UserRole.ADMIN,
-    dateCreation: new Date('2024-01-01'),
-    actif: true
-  },
-  {
-    id: '2', 
-    nom: 'Marie Qualité',
-    email: 'qa@universite.fr',
-    role: UserRole.QA,
-    dateCreation: new Date('2024-01-15'),
-    actif: true
-  },
-  {
-    id: '3',
-    nom: 'Jean Opérations',
-    email: 'sto@universite.fr', 
-    role: UserRole.STO,
-    dateCreation: new Date('2024-02-01'),
-    actif: true
-  }
-];
+// const mockUsers: User[] = [
+//   {
+//     id: '1',
+//     nom: 'Admin Principal',
+//     email: 'admin@universite.fr',
+//     role: UserRole.ADMIN,
+//     dateCreation: new Date('2024-01-01'),
+//     actif: true
+//   },
+//   {
+//     id: '2', 
+//     nom: 'Marie Qualité',
+//     email: 'qa@universite.fr',
+//     role: UserRole.QA,
+//     dateCreation: new Date('2024-01-15'),
+//     actif: true
+//   },
+//   {
+//     id: '3',
+//     nom: 'Jean Opérations',
+//     email: 'sto@universite.fr', 
+//     role: UserRole.STO,
+//     dateCreation: new Date('2024-02-01'),
+//     actif: true
+//   }
+// ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { login: signin, register: signup, logout: disconnect } = useAuthentication()
 
   useEffect(() => {
     // Vérifier si un utilisateur est déjà connecté
@@ -56,28 +57,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await apiService.login({ email, password });
-      
-      if (response.success && response.data) {
+      const response = await signin({ email, password });
+
+      if (response.user) {
         // Convertir la réponse de l'API au format du frontend
-        const apiUser = response.data.user;
+        const apiUser = response.user;
         const frontendUser: User = {
-          id: apiUser.id.toString(),
-          nom: `${apiUser.prenom} ${apiUser.nom}`,
+          id: apiUser.id!.toString(),
+          firstName: `${apiUser.firstName} ${apiUser.lastName}`,
           email: apiUser.email,
-          role: apiUser.roles.includes('ADMIN') ? UserRole.ADMIN :
-                apiUser.roles.includes('QA') ? UserRole.QA :
-                apiUser.roles.includes('STO') ? UserRole.STO : UserRole.VIEWER,
-          dateCreation: new Date(),
-          actif: true
+          role: apiUser.role!.includes('ADMIN') ? UserRole.ADMIN :
+            apiUser.role!.includes('QA') ? UserRole.QA :
+              apiUser.role!.includes('STO') ? UserRole.STO : UserRole.USER,
+          createdAt: new Date(),
+          status: UserStatus.ACTIVE
         };
-        
+
         setUser(frontendUser);
         setIsAuthenticated(true);
         localStorage.setItem('user', JSON.stringify(frontendUser));
         return true;
       } else {
-        console.error('Erreur de connexion:', response.error?.message);
+        console.error('Erreur de connexion');
         return false;
       }
     } catch (error) {
@@ -86,21 +87,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (nom: string, email: string, password: string, role: UserRole): Promise<boolean> => {
+  const register = async (firstName: string, lastName: string, email: string, password: string, role: UserRole): Promise<boolean> => {
     // Simulation d'inscription
-    if (nom && email && password) {
-      const newUser: User = {
-        id: Date.now().toString(),
-        nom,
+
+
+    if (firstName && email && password) {
+      const newUser = await signup({
         email,
-        role,
-        dateCreation: new Date(),
-        actif: true
-      };
-      mockUsers.push(newUser);
+        password,
+        firstName,
+        lastName,
+        role
+      });
       setUser(newUser);
       setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify({ id: newUser.id, email: newUser.email, role: newUser.role, status: newUser.status }));
       return true;
     }
     return false;
@@ -108,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await apiService.logout();
+      await disconnect();
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     } finally {
@@ -126,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       login,
-      register, 
+      register,
       logout,
       isAuthenticated,
       hasRole

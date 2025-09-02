@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { UserRole } from '../../types';
 import { User, Mail, Lock, AlertCircle, UserCheck } from 'lucide-react';
+import { UserRole } from '../../types/type';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
@@ -9,11 +9,12 @@ interface RegisterFormProps {
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    nom: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: UserRole.VIEWER
+    role: UserRole.USER
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
     }
 
     try {
-      const success = await register(formData.nom, formData.email, formData.password, formData.role);
+      const success = await register(formData.firstName,formData.lastName, formData.email, formData.password, formData.role);
       if (!success) {
         setError('Erreur lors de la création du compte');
       }
@@ -70,14 +71,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nom complet
+              Nom
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                name="nom"
-                value={formData.nom}
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Julien Julien"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Postnom
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleInputChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Julien Julien"
@@ -114,7 +133,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
               onChange={handleInputChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value={UserRole.VIEWER}>Observateur</option>
+              <option value={UserRole.USER}>Observateur</option>
               <option value={UserRole.QA}>Équipe Qualité</option>
               <option value={UserRole.STO}>Équipe Opérationnelle</option>
               <option value={UserRole.ADMIN}>Administrateur</option>

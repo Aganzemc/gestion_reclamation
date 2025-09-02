@@ -28,9 +28,9 @@ model User {
   tickets         Ticket[]           @relation("CreatedTickets")
   assignedTickets TicketAssignment[]
   notifications   Notification[]
+  Session         Session[]
 
   @@map("users")
-  Session Session[]
 }
 
 // Modèle Ticket
@@ -77,15 +77,15 @@ model Notification {
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  userId       String   @map("user_id")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token        String   @unique
-  refreshToken String   @unique @map("refresh_token")
-  userAgent    String?  @map("user_agent")
-  ipAddress    String?  @map("ip_address")
-  expiresAt    DateTime @map("expires_at")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String    @unique
+  refreshToken String    @unique @map("refresh_token")
+  userAgent    String?   @map("user_agent")
+  ipAddress    String?   @map("ip_address")
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
   revokedAt    DateTime? @map("revoked_at")
 
   @@map("sessions")
