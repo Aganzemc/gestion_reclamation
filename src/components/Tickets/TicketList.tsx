@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
-import { Ticket, TicketStatus, TicketType, TicketPriority } from '../../types';
-import { mockTickets } from '../../data/mockData';
+import React, { useEffect, useState } from 'react';
+import { Ticket, TicketStatus, TicketType, TicketPriority } from '../../types/type';
 import TicketForm from './TicketForm';
 import { 
   Plus, 
   Edit, 
   Eye, 
-  Filter, 
   Download, 
   Search,
-  Calendar
 } from 'lucide-react';
+import { useTicketStore } from '../../stores/ticketStore';
 
 const TicketList: React.FC = () => {
-  const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
+  const {tickets, getTickets, createTicket, updateTicket} = useTicketStore()
+  // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
   const [showForm, setShowForm] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [filters, setFilters] = useState({
@@ -23,50 +22,43 @@ const TicketList: React.FC = () => {
     priority: ''
   });
 
-  const handleCreateTicket = (ticketData: Partial<Ticket>) => {
-    const newTicket: Ticket = {
-      id: Date.now().toString(),
-      reference: `REC-2024-${String(tickets.length + 1).padStart(3, '0')}`,
-      titre: ticketData.titre!,
-      description: ticketData.description!,
-      type: ticketData.type!,
-      priorite: ticketData.priorite!,
-      statut: TicketStatus.OUVERT,
-      assignes: ticketData.assignes || [],
-      createur: tickets[0].createur, // Mock user
-      dateCreation: new Date(),
-      commentaires: []
-    };
+  useEffect(() => {
+    getTickets()
+  }, [tickets])
 
-    setTickets([newTicket, ...tickets]);
+  const handleCreateTicket = async (ticketData: Ticket) => {
+    await createTicket({
+      ...ticketData,
+      description: ticketData.description ?? undefined
+    }) 
+    
     setShowForm(false);
   };
 
-  const handleEditTicket = (ticketData: Partial<Ticket>) => {
+  const handleEditTicket = async (ticketData: Ticket) => {
     if (editingTicket) {
-      setTickets(tickets.map(ticket => 
-        ticket.id === editingTicket.id 
-          ? { ...ticket, ...ticketData }
-          : ticket
-      ));
+      await updateTicket(editingTicket.id!, {
+        ...ticketData,
+        description: ticketData.description ?? undefined
+      })
       setEditingTicket(null);
     }
   };
 
   const getPriorityColor = (priority: TicketPriority) => {
     switch (priority) {
-      case TicketPriority.CRITIQUE: return 'bg-red-100 text-red-800';
-      case TicketPriority.HAUTE: return 'bg-orange-100 text-orange-800';
-      case TicketPriority.MOYENNE: return 'bg-yellow-100 text-yellow-800';
-      case TicketPriority.BASSE: return 'bg-green-100 text-green-800';
+      case TicketPriority.URGENT: return 'bg-red-100 text-red-800';
+      case TicketPriority.HIGH: return 'bg-orange-100 text-orange-800';
+      case TicketPriority.MEDIUM: return 'bg-yellow-100 text-yellow-800';
+      case TicketPriority.LOW: return 'bg-green-100 text-green-800';
     }
   };
 
   const getStatusColor = (status: TicketStatus) => {
     switch (status) {
-      case TicketStatus.OUVERT: return 'bg-blue-100 text-blue-800';
-      case TicketStatus.EN_COURS: return 'bg-yellow-100 text-yellow-800';
-      case TicketStatus.CLOTURE: return 'bg-green-100 text-green-800';
+      case TicketStatus.OPEN: return 'bg-blue-100 text-blue-800';
+      case TicketStatus.IN_PROGRESS: return 'bg-yellow-100 text-yellow-800';
+      case TicketStatus.CLOSED: return 'bg-green-100 text-green-800';
     }
   };
 
@@ -81,11 +73,11 @@ const TicketList: React.FC = () => {
   const filteredTickets = tickets.filter(ticket => {
     return (
       (!filters.search || 
-        ticket.titre.toLowerCase().includes(filters.search.toLowerCase()) ||
-        ticket.reference.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters.status || ticket.statut === filters.status) &&
+        ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        ticket.id?.toLowerCase().includes(filters.search.toLowerCase())) &&
+      (!filters.status || ticket.status === filters.status) &&
       (!filters.type || ticket.type === filters.type) &&
-      (!filters.priority || ticket.priorite === filters.priority)
+      (!filters.priority || ticket.priority === filters.priority)
     );
   });
 
@@ -122,9 +114,9 @@ const TicketList: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Tous les statuts</option>
-            <option value={TicketStatus.OUVERT}>Ouvert</option>
-            <option value={TicketStatus.EN_COURS}>En cours</option>
-            <option value={TicketStatus.CLOTURE}>Clôturé</option>
+            <option value={TicketStatus.OPEN}>Ouvert</option>
+            <option value={TicketStatus.IN_PROGRESS}>En cours</option>
+            <option value={TicketStatus.CLOSED}>Clôturé</option>
           </select>
 
           <select
@@ -144,10 +136,10 @@ const TicketList: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Toutes priorités</option>
-            <option value={TicketPriority.CRITIQUE}>Critique</option>
-            <option value={TicketPriority.HAUTE}>Haute</option>
-            <option value={TicketPriority.MOYENNE}>Moyenne</option>
-            <option value={TicketPriority.BASSE}>Basse</option>
+            <option value={TicketPriority.URGENT}>Critique</option>
+            <option value={TicketPriority.HIGH}>Haute</option>
+            <option value={TicketPriority.MEDIUM}>Moyenne</option>
+            <option value={TicketPriority.LOW}>Basse</option>
           </select>
         </div>
 
@@ -198,34 +190,34 @@ const TicketList: React.FC = () => {
               {filteredTickets.map((ticket) => (
                 <tr key={ticket.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                    {ticket.reference}
+                    {ticket.id}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                    {ticket.titre}
+                    {ticket.title}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(ticket.type)}`}>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(ticket.type!)}`}>
                       {ticket.type}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(ticket.priorite)}`}>
-                      {ticket.priorite}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(ticket.priority!)}`}>
+                      {ticket.priority}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(ticket.statut)}`}>
-                      {ticket.statut}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(ticket.status!)}`}>
+                      {ticket.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {ticket.assignes.length > 0 
-                      ? ticket.assignes.map(a => a.nom).join(', ')
+                    {ticket.assignedTo!.length > 0 
+                      ? ticket.assignedTo!.map(a => a.user?.firstName).join(', ')
                       : 'Non assigné'
                     }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {ticket.dateCreation.toLocaleDateString('fr-FR')}
+                    {ticket.createdAt?.toLocaleDateString('fr-FR')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">

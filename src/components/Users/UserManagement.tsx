@@ -1,32 +1,30 @@
-import React, { useState } from 'react';
-import { User, UserRole } from '../../types';
-import { mockUsers } from '../../data/mockData';
+import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Shield, Users, Search } from 'lucide-react';
 import UserForm from './UserForm';
+import { useUsers } from '../../hooks/useUser';
+import { User, UserRole, UserStatus } from '../../types/type';
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const { users, getUsers, createUser, updateUser } = useUsers()
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
-    const [showForm, setShowForm] = useState(false); 
+  const [showForm, setShowForm] = useState(false);
 
-      const handleAddUser = (newUser: Partial<User>) => {
-    setUsers([
-      ...users,
-      {
-        ...newUser,
-        id: crypto.randomUUID(),
-      } as User,
-    ]);
+  const handleAddUser = (newUser: User) => {
+    createUser(newUser);
     setShowForm(false);
   };
+
+  useEffect(() => {
+    getUsers();
+  }, [users])
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMIN: return 'bg-red-100 text-red-800';
       case UserRole.QA: return 'bg-blue-100 text-blue-800';
       case UserRole.STO: return 'bg-green-100 text-green-800';
-      case UserRole.VIEWER: return 'bg-gray-100 text-gray-800';
+      case UserRole.USER: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -35,34 +33,33 @@ const UserManagement: React.FC = () => {
       case UserRole.ADMIN: return <Shield size={16} />;
       case UserRole.QA: return <Users size={16} />;
       case UserRole.STO: return <Users size={16} />;
-      case UserRole.VIEWER: return <Users size={16} />;
+      case UserRole.USER: return <Users size={16} />;
     }
   };
 
   const filteredUsers = users.filter(user => {
     return (
-      (!searchTerm || 
-        user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (!searchTerm ||
+        user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (!filterRole || user.role === filterRole)
     );
   });
 
   const toggleUserStatus = (userId: string) => {
-    setUsers(users.map(user => 
-      user.id === userId 
-        ? { ...user, actif: !user.actif }
-        : user
-    ));
+    const currentStatus = users.find(u => u.id === userId)?.status;
+    updateUser(userId, {
+      status: currentStatus === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-        <button 
-        onClick={() => setShowForm(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
           <Plus size={16} />
           <span>Nouvel utilisateur</span>
         </button>
@@ -90,7 +87,7 @@ const UserManagement: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Actifs</p>
               <p className="text-2xl font-bold text-gray-900">
-                {users.filter(u => u.actif).length}
+                {users.filter(u => u.status === "ACTIVE").length}
               </p>
             </div>
           </div>
@@ -136,7 +133,7 @@ const UserManagement: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
@@ -146,7 +143,7 @@ const UserManagement: React.FC = () => {
             <option value={UserRole.ADMIN}>Administrateur</option>
             <option value={UserRole.QA}>Équipe Qualité</option>
             <option value={UserRole.STO}>Équipe Opérationnelle</option>
-            <option value={UserRole.VIEWER}>Observateur</option>
+            <option value={UserRole.USER}>Observateur</option>
           </select>
         </div>
       </div>
@@ -185,13 +182,13 @@ const UserManagement: React.FC = () => {
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                           <span className="text-sm font-medium text-gray-700">
-                            {user.nom.split(' ').map(n => n[0]).join('')}
+                            {user.firstName?.split(' ').map(n => n[0]).join('')}
                           </span>
                         </div>
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.nom}
+                          {user.firstName} {user.lastName}
                         </div>
                       </div>
                     </div>
@@ -201,25 +198,24 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
-                      {getRoleIcon(user.role)}
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                      {getRoleIcon(user.role!)}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role!)}`}>
                         {user.role}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.dateCreation.toLocaleDateString('fr-FR')}
+                    {user.createdAt!.toLocaleDateString('fr-FR')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
-                      onClick={() => toggleUserStatus(user.id)}
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.actif 
-                          ? 'bg-green-100 text-green-800' 
+                      onClick={() => toggleUserStatus(user.id!)}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === "ACTIVE"
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
-                      {user.actif ? 'Actif' : 'Inactif'}
+                      {user.status ? 'ACTIVE' : 'INACTIVE'}
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -234,9 +230,9 @@ const UserManagement: React.FC = () => {
         </div>
       </div>
       {showForm && (
-        <UserForm 
-          onSave={handleAddUser} 
-          onCancel={() => setShowForm(false)} 
+        <UserForm
+          onSave={handleAddUser}
+          onCancel={() => setShowForm(false)}
         />
       )}
     </div>

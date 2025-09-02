@@ -63,14 +63,14 @@ export interface User {
 }
 
 export interface Ticket {
-  id: string;
+  id?: string;
   title: string;
   description?: string | null;
   status: TicketStatus;
-  priority: TicketPriority;
-  type: TicketType;
-  createdAt: Date;
-  updatedAt: Date;
+  priority?: TicketPriority;
+  type?: TicketType;
+  createdAt?: Date;
+  updatedAt?: Date;
   createdById: string;
   createdBy?: User;
   assignedTo?: TicketAssignment[];

@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
             
             <div className="flex items-center space-x-4">
               <div className="hidden md:block text-sm text-gray-600">
-                Connecté en tant que <span className="font-medium">{user?.nom}</span>
+                Connecté en tant que <span className="font-medium">{user?.firstName}</span>
               </div>
               <button
                 onClick={logout}

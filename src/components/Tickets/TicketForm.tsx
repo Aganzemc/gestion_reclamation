@@ -1,43 +1,45 @@
-import React, { useState } from 'react';
-import { Ticket, TicketType, TicketPriority, User } from '../../types';
-import { mockUsers } from '../../data/mockData';
+import React, { useEffect, useState } from 'react';
+import { Ticket, TicketType, TicketPriority,TicketStatus } from '../../types/type';
 import { X, Save } from 'lucide-react';
+import { useUserStore } from '../../stores/userStore';
+import { useTickets } from '../../hooks/useTickets';
 
 interface TicketFormProps {
   ticket?: Ticket;
-  onSave: (ticketData: Partial<Ticket>) => void;
+  onSave: (ticketData: Ticket) => void;
   onCancel: () => void;
 }
 
 const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => {
+  const { users, getUsers } = useUserStore()
+  const { updateTicketStatus } = useTickets()
+
+  useEffect(() => {
+    getUsers()
+  }, [users])
+
   const [formData, setFormData] = useState({
-    titre: ticket?.titre || '',
-    description: ticket?.description || '',
-    type: ticket?.type || TicketType.INCIDENT,
-    priorite: ticket?.priorite || TicketPriority.MOYENNE,
-    assignes: ticket?.assignes?.map(a => a.id) || []
+    id: ticket?.id,
+    title: ticket?.title ?? "",
+    description: ticket?.description ?? null,
+    status: ticket?.status ?? TicketStatus.IN_PROGRESS, // valeur par défaut
+    priority: ticket?.priority ?? TicketPriority.MEDIUM, // valeur par défaut
+    type: ticket?.type ?? TicketType.INCIDENT, // valeur par défaut
+    createdById: ticket?.createdById ?? "",
+    createdAt: ticket?.createdAt,
+    updatedAt: ticket?.updatedAt,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const assignedUsers = mockUsers.filter(user => 
-      formData.assignes.includes(user.id)
-    );
 
     onSave({
-      ...formData,
-      assignes: assignedUsers
+      ...formData
     });
   };
 
-  const handleAssigneeChange = (userId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      assignes: checked 
-        ? [...prev.assignes, userId]
-        : prev.assignes.filter(id => id !== userId)
-    }));
+  const handleAssigneeChange = async (userId: string, statuts: TicketStatus) => {
+    await updateTicketStatus(userId, statuts)
   };
 
   return (
@@ -62,8 +64,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
             </label>
             <input
               type="text"
-              value={formData.titre}
-              onChange={(e) => setFormData({ ...formData, titre: e.target.value })}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Titre de la réclamation"
               required
@@ -75,7 +77,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
               Description *
             </label>
             <textarea
-              value={formData.description}
+              value={formData.description!}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -105,14 +107,14 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
                 Priorité
               </label>
               <select
-                value={formData.priorite}
-                onChange={(e) => setFormData({ ...formData, priorite: e.target.value as TicketPriority })}
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as TicketPriority })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value={TicketPriority.BASSE}>Basse</option>
-                <option value={TicketPriority.MOYENNE}>Moyenne</option>
-                <option value={TicketPriority.HAUTE}>Haute</option>
-                <option value={TicketPriority.CRITIQUE}>Critique</option>
+                <option value={TicketPriority.LOW}>Basse</option>
+                <option value={TicketPriority.MEDIUM}>Moyenne</option>
+                <option value={TicketPriority.HIGH}>Haute</option>
+                <option value={TicketPriority.URGENT}>Critique</option>
               </select>
             </div>
           </div>
@@ -122,16 +124,21 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
               Assignation
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
-              {mockUsers.map((user) => (
+              {users.map((user) => (
                 <label key={user.id} className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.assignes.includes(user.id)}
-                    onChange={(e) => handleAssigneeChange(user.id, e.target.checked)}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
+                  <select
+                    value={formData.status}
+                    onChange={(e) => handleAssigneeChange(user.id!, e.target.value as TicketStatus)}
+                    className="w-full rounded border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {Object.values(TicketStatus).map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{user.nom}</div>
+                    <div className="text-sm font-medium text-gray-900">{user.firstName}</div>
                     <div className="text-xs text-gray-500">{user.email} - {user.role}</div>
                   </div>
                 </label>

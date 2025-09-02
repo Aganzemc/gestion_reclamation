@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
-import { User, UserRole } from '../../types';
 import { X, Save } from 'lucide-react';
+import { User, UserRole, UserStatus } from '../../types/type';
 
 interface UserFormProps {
   user?: User;
-  onSave: (userData: Partial<User>) => void;
+  onSave: (userData: User) => void;
   onCancel: () => void;
 }
 
 const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
-    nom: user?.nom || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
-    role: user?.role || UserRole.VIEWER,
-    actif: user?.actif ?? true,
+    role: user?.role || UserRole.USER,
+    status: user?.status ?? UserStatus.ACTIVE,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
       ...formData,
-      dateCreation: user?.dateCreation || new Date(),
     });
   };
 
@@ -48,10 +48,24 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
             </label>
             <input
               type="text"
-              value={formData.nom}
-              onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+              value={formData.firstName}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Nom complet"
+              placeholder="Nom"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Postnom *
+            </label>
+            <input
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Post nom"
               required
             />
           </div>
@@ -85,17 +99,24 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
             </select>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="actif"
-              type="checkbox"
-              checked={formData.actif}
-              onChange={(e) => setFormData({ ...formData, actif: e.target.checked })}
-              className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="actif" className="ml-2 text-sm text-gray-700">
-              Utilisateur actif
+          <div className="flex flex-col">
+            <label htmlFor="status" className="mb-1 text-sm text-gray-700">
+              Statut de l’utilisateur
             </label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={(e) =>
+                setFormData({ ...formData, status: e.target.value as UserStatus })
+              }
+              className="w-full rounded border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              {Object.values(UserStatus).map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Actions */}
