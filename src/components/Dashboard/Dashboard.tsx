@@ -1,11 +1,11 @@
-import React from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import React, { useEffect } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
   Line,
@@ -15,18 +15,35 @@ import {
 } from 'recharts';
 import KPICard from './KPICard';
 import { mockKPIData } from '../../data/mockData';
-import { 
-  Ticket, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle, 
-  TrendingUp 
+import {
+  Ticket,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
+import { useTickets } from '../../hooks/useTickets';
+import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } from '../../lib/builTendanceTickets';
 
 const Dashboard: React.FC = () => {
   const data = mockKPIData;
 
+
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+  const { getTickets, tickets } = useTickets()
+
+  const totalTickets = tickets.length;
+  const ticketsEnCours = tickets.filter(ticket => ticket.status === 'IN_PROGRESS').length;
+  const ticketsClotures = tickets.filter(ticket => ticket.status === 'CLOSED').length;
+
+  // utilisation
+  const tendanceMensuelle = buildTendanceMensuelle(tickets);
+  const repartitionType = buildRepartitionType(tickets);
+  const ticketsParAgent = buildTicketsParAgent(tickets);
+
+  useEffect(() => {
+    getTickets()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -41,7 +58,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Total Réclamations"
-          value={data.totalTickets}
+          value={totalTickets}
           change="+12% ce mois"
           changeType="positive"
           icon={Ticket}
@@ -49,7 +66,7 @@ const Dashboard: React.FC = () => {
         />
         <KPICard
           title="En Cours"
-          value={data.ticketsEnCours}
+          value={ticketsEnCours}
           change="-5% vs mois précédent"
           changeType="negative"
           icon={Clock}
@@ -57,7 +74,7 @@ const Dashboard: React.FC = () => {
         />
         <KPICard
           title="Clôturées"
-          value={data.ticketsClotures}
+          value={ticketsClotures}
           change="+18% ce mois"
           changeType="positive"
           icon={CheckCircle}
@@ -81,28 +98,28 @@ const Dashboard: React.FC = () => {
             Évolution Mensuelle
           </h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.tendanceMensuelle}>
+            <LineChart data={tendanceMensuelle}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="mois" 
+              <XAxis
+                dataKey="mois"
                 tick={{ fontSize: 12 }}
                 stroke="#666"
               />
-              <YAxis 
+              <YAxis
                 tick={{ fontSize: 12 }}
                 stroke="#666"
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: '#fff',
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px'
                 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="tickets" 
-                stroke="#3B82F6" 
+              <Line
+                type="monotone"
+                dataKey="tickets"
+                stroke="#3B82F6"
                 strokeWidth={3}
                 dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
               />
@@ -118,17 +135,22 @@ const Dashboard: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={data.repartitionType}
+                data={repartitionType}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent! * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  `${name} ${(percent! * 100).toFixed(0)}%`
+                }
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
               >
-                {data.repartitionType.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {repartitionType.map((_entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -138,37 +160,28 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Tickets par agent */}
+      {/* Tickets par agent */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Charge de Travail par Agent
         </h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.ticketsParAgent}>
+          <BarChart data={ticketsParAgent}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="agent" 
-              tick={{ fontSize: 12 }}
-              stroke="#666"
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              stroke="#666"
-            />
-            <Tooltip 
+            <XAxis dataKey="agent" tick={{ fontSize: 12 }} stroke="#666" />
+            <YAxis tick={{ fontSize: 12 }} stroke="#666" />
+            <Tooltip
               contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px'
+                backgroundColor: "#fff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
               }}
             />
-            <Bar 
-              dataKey="count" 
-              fill="#3B82F6"
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
+
 
       {/* Alertes et notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -207,3 +220,44 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
+// import { AppSidebar } from "../../components/app-sidebar"
+// import { ChartAreaInteractive } from "../../components/chart-area-interactive"
+// import { DataTable } from "../../components/data-table"
+// import { SectionCards } from "../../components/section-cards"
+// import { SiteHeader } from "../../components/site-header"
+// import {
+//   SidebarInset,
+//   SidebarProvider,
+// } from "../../components/ui/sidebar"
+
+// import data from "./data.json"
+
+// export default function Page() {
+//   return (
+//     <SidebarProvider
+//       style={
+//         {
+//           "--sidebar-width": "calc(var(--spacing) * 72)",
+//           "--header-height": "calc(var(--spacing) * 12)",
+//         } as React.CSSProperties
+//       }
+//     >
+//       <AppSidebar variant="inset" />
+//       <SidebarInset>
+//         <SiteHeader />
+//         <div className="flex flex-1 flex-col">
+//           <div className="@container/main flex flex-1 flex-col gap-2">
+//             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+//               <SectionCards />
+//               <div className="px-4 lg:px-6">
+//                 <ChartAreaInteractive />
+//               </div>
+//               <DataTable data={data} />
+//             </div>
+//           </div>
+//         </div>
+//       </SidebarInset>
+//     </SidebarProvider>
+//   )
+// }
