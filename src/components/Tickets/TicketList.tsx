@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Ticket, TicketStatus, TicketType, TicketPriority } from '../../types/type';
 import TicketForm from './TicketForm';
-import { 
-  Plus, 
-  Edit, 
-  Eye, 
-  Download, 
+import {
+  Plus,
+  Edit,
+  Eye,
+  Download,
   Search,
 } from 'lucide-react';
 import { useTicketStore } from '../../stores/ticketStore';
+import { useAuthentication } from '../../hooks/useAuth';
+import { useAssignments } from '../../hooks/useAssignments';
 
 const TicketList: React.FC = () => {
-  const {tickets, getTickets, createTicket, updateTicket} = useTicketStore()
+  const { tickets, getTickets, createTicket, updateTicket } = useTicketStore()
+  const { getSession, userId } = useAuthentication()
   // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
+  const { assignedUsers, createAssignment, reset } = useAssignments()
   const [showForm, setShowForm] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [filters, setFilters] = useState({
@@ -24,23 +28,40 @@ const TicketList: React.FC = () => {
 
   useEffect(() => {
     getTickets()
-  }, [tickets])
+    getSession()
+  }, [])
 
   const handleCreateTicket = async (ticketData: Ticket) => {
-    await createTicket({
+    console.log("my data", ticketData)
+    const newTicket = await createTicket({
       ...ticketData,
-      description: ticketData.description ?? undefined
-    }) 
-    
+      description: ticketData.description ?? undefined,
+      createdById: userId!
+    })
+
+    assignedUsers.forEach(user => {
+      createAssignment({
+        ticketId: newTicket.id!,
+        userId: user.userId
+      })
+    })
+    reset()
     setShowForm(false);
   };
 
   const handleEditTicket = async (ticketData: Ticket) => {
     if (editingTicket) {
-      await updateTicket(editingTicket.id!, {
+      const updatedTicket = await updateTicket(editingTicket.id!, {
         ...ticketData,
         description: ticketData.description ?? undefined
       })
+      assignedUsers.forEach(user => {
+          createAssignment({
+            ticketId: updatedTicket.id!,
+            userId: user.userId
+          })
+        })
+        reset()
       setEditingTicket(null);
     }
   };
@@ -71,7 +92,7 @@ const TicketList: React.FC = () => {
   };
 
   const filteredTickets = Array.isArray(tickets)
-  ? tickets.filter(ticket => {
+    ? tickets.filter(ticket => {
       return (
         (!filters.search ||
           ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -81,7 +102,7 @@ const TicketList: React.FC = () => {
         (!filters.priority || ticket.priority === filters.priority)
       );
     })
-  : [];
+    : [];
 
   return (
     <div className="space-y-6">
@@ -109,7 +130,7 @@ const TicketList: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
@@ -213,7 +234,7 @@ const TicketList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {ticket.assignedTo!.length > 0 
+                    {ticket.assignedTo!.length > 0
                       ? ticket.assignedTo!.map(a => a.user?.firstName).join(', ')
                       : 'Non assigné'
                     }

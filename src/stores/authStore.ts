@@ -1,7 +1,7 @@
 // stores/authStore.ts
 import { create } from 'zustand';
 import axios from 'axios';
-import { User, UserRole } from '../types/type';
+import { Session, User, UserRole } from '../types/type';
 
 // Configuration Axios de base
 // const api = axios.create({
@@ -55,6 +55,7 @@ const baseURL = "http://localhost:4000/api/auth";
 
 interface AuthState {
   user: User | null;
+  userId: string | null;
   token: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
@@ -74,10 +75,12 @@ interface AuthState {
   clearError: () => void;
   setTokens: (token: string, refreshToken: string) => void;
   clearAuth: () => void;
+  getSession: () => Promise<Session>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  userId: null,
   token: localStorage.getItem('authToken'),
   refreshToken: localStorage.getItem('refreshToken'),
   isAuthenticated: !!localStorage.getItem('authToken'),
@@ -271,6 +274,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isAuthenticated: false 
     });
   },
+
+  getSession: async () => {
+    const token = localStorage.getItem("authToken")
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`${baseURL}/${token}`);
+      const session = response.data;
+
+      set({ 
+        userId: session.userId,
+        token: session.token, 
+        refreshToken: session.refreshToken, 
+        loading: false 
+      });
+      
+      set({ loading: false });
+      return session;
+    } catch (error: any) {
+      set({ loading: false });
+      return false;
+    }
+  }
+
 }));
 
 // Types pour les formulaires

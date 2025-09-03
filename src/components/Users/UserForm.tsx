@@ -20,7 +20,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      ...formData,
+      email: formData.email, 
+      password: "12345678", 
+      firstName: formData.firstName, 
+      lastName: formData.lastName,
+      role: formData.role,
     });
   };
 
@@ -96,6 +100,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
               <option value={UserRole.ADMIN}>Admin</option>
               <option value={UserRole.QA}>QA</option>
               <option value={UserRole.STO}>STO</option>
+              <option value={UserRole.USER}>Utilisateur</option>
             </select>
           </div>
 

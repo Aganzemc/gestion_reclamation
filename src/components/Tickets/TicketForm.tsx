@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Ticket, TicketType, TicketPriority,TicketStatus } from '../../types/type';
+import { Ticket, TicketType, TicketPriority, TicketStatus } from '../../types/type';
 import { X, Save } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
-import { useTickets } from '../../hooks/useTickets';
+import { useAssignments } from '../../hooks/useAssignments';
 
 interface TicketFormProps {
   ticket?: Ticket;
@@ -12,7 +12,7 @@ interface TicketFormProps {
 
 const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => {
   const { users, getUsers } = useUserStore()
-  const { updateTicketStatus } = useTickets()
+  const {addUser, removeUser, assignedUsers,} = useAssignments()
 
   useEffect(() => {
     getUsers()
@@ -28,19 +28,33 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
     createdById: ticket?.createdById ?? "",
     createdAt: ticket?.createdAt,
     updatedAt: ticket?.updatedAt,
+    assignedTo: ticket?.assignedTo
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     onSave({
-      ...formData
+      title: formData.title,
+      description: formData.description,
+      priority: formData.priority,
+      type: formData.type,
+      createdById: formData.createdById,
     });
   };
 
-  const handleAssigneeChange = async (userId: string, statuts: TicketStatus) => {
-    await updateTicketStatus(userId, statuts)
+  
+
+  const handleAssigneeChange = (userId: string, checked: boolean) => {
+    if (checked) {
+      addUser(userId);
+    } else {
+      removeUser(userId);
+    }
   };
+
+
+
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
@@ -119,32 +133,46 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
             </div>
           </div>
 
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Assignation
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
-              {users.map((user) => (
-                <label key={user.id} className="flex items-center space-x-3">
-                  <select
-                    value={formData.status}
-                    onChange={(e) => handleAssigneeChange(user.id!, e.target.value as TicketStatus)}
-                    className="w-full rounded border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
+              {users.map((user) => {
+                const isChecked =
+                  (assignedUsers.some((a) => a.userId === user.id) || 
+                  ticket?.assignedTo?.some((a) => a.userId === user.id)) || 
+                  false;
+
+                return (
+                  <label
+                    key={user.id}
+                    className="flex items-center gap-3 py-1 cursor-pointer"
                   >
-                    {Object.values(TicketStatus).map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{user.firstName}</div>
-                    <div className="text-xs text-gray-500">{user.email} - {user.role}</div>
-                  </div>
-                </label>
-              ))}
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleAssigneeChange(user.id!, e.target.checked)
+                      }
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {user.email} — {user.role}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
+
+
 
           <div className="flex justify-end space-x-3 pt-6 border-t">
             <button

@@ -66,7 +66,7 @@ export interface Ticket {
   id?: string;
   title: string;
   description?: string | null;
-  status: TicketStatus;
+  status?: TicketStatus;
   priority?: TicketPriority;
   type?: TicketType;
   createdAt?: Date;
@@ -77,12 +77,17 @@ export interface Ticket {
 }
 
 export interface TicketAssignment {
-  id: string;
+  id?: string;
   ticketId: string;
   userId: string;
-  assignedAt: Date;
+  assignedAt?: Date;
   ticket?: Ticket;
   user?: User;
+}
+
+export interface Session {
+  userId: string;
+  token: string
 }
 
 export interface Notification {

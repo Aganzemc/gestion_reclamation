@@ -4,6 +4,7 @@ import { useTicketStore } from '../stores/ticketStore';
 export const useTickets = () => {
   const {
     tickets,
+    ticket,
     currentTicket,
     userTickets,
     loading,
@@ -24,6 +25,7 @@ export const useTickets = () => {
 
   return {
     tickets,
+    ticket,
     currentTicket,
     userTickets,
     loading,

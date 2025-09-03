@@ -25,6 +25,10 @@ export type AssignmentWithRelations = TicketAssignment & {
   ticket: Ticket;
 };
 
+interface AssignedUser {
+  userId: string;
+}
+
 interface AssignmentState {
   assignments: AssignmentWithRelations[];
   currentAssignment: AssignmentWithRelations | null;
@@ -33,19 +37,24 @@ interface AssignmentState {
   assignmentStats: any;
   loading: boolean;
   error: string | null;
-  
+
+  assignedUsers: AssignedUser[];
+  addUser: (userId: string) => void;
+  removeUser: (userId: string) => void;
+  reset: () => void;
+
   // Actions principales pour les assignations
   getAssignments: () => Promise<void>;
   getAssignmentById: (id: string) => Promise<AssignmentWithRelations>;
   createAssignment: (assignmentData: CreateAssignmentFormData) => Promise<AssignmentWithRelations>;
   deleteAssignment: (id: string) => Promise<void>;
-  
+
   // Actions spécifiques
   getTicketAssignments: (ticketId: string) => Promise<AssignmentWithRelations[]>;
   getUserAssignments: (userId: string) => Promise<AssignmentWithRelations[]>;
   removeUserFromTicket: (ticketId: string, userId: string) => Promise<void>;
   getAssignmentStats: () => Promise<any>;
-  
+
   // Utilitaires
   clearError: () => void;
   setCurrentAssignment: (assignment: AssignmentWithRelations | null) => void;
@@ -60,15 +69,31 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   loading: false,
   error: null,
 
+  assignedUsers: [],
+
+  addUser: (userId) =>
+    set((state) => {
+      // éviter les doublons
+      if (state.assignedUsers.some((a) => a.userId === userId)) return state;
+      return { assignedUsers: [...state.assignedUsers, { userId }] };
+    }),
+
+  removeUser: (userId) =>
+    set((state) => ({
+      assignedUsers: state.assignedUsers.filter((a) => a.userId !== userId),
+    })),
+
+  reset: () => set({ assignedUsers: [] }),
+
   getAssignments: async () => {
     set({ loading: true, error: null });
     try {
       const response = await axios.get(`${baseURL}/`);
       set({ assignments: response.data, loading: false });
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la récupération des assignations',
-        loading: false 
+        loading: false
       });
     }
   },
@@ -81,9 +106,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
       set({ currentAssignment: assignment, loading: false });
       return assignment;
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la récupération de l\'assignation',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -94,17 +119,17 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     try {
       const response = await axios.post(`${baseURL}/`, assignmentData);
       const newAssignment = response.data;
-      
+
       set((state) => ({
         assignments: [...state.assignments, newAssignment],
         loading: false
       }));
-      
+
       return newAssignment;
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la création de l\'assignation',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -114,7 +139,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     set({ loading: true, error: null });
     try {
       await axios.delete(`${baseURL}/${id}`);
-      
+
       set((state) => ({
         assignments: state.assignments.filter(assignment => assignment.id !== id),
         currentAssignment: state.currentAssignment?.id === id ? null : state.currentAssignment,
@@ -123,9 +148,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
         loading: false
       }));
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la suppression de l\'assignation',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -139,9 +164,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
       set({ ticketAssignments: assignments, loading: false });
       return assignments;
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la récupération des assignations du ticket',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -155,9 +180,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
       set({ userAssignments: assignments, loading: false });
       return assignments;
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la récupération des assignations de l\'utilisateur',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -167,7 +192,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     set({ loading: true, error: null });
     try {
       await axios.delete(`${baseURL}/ticket/${ticketId}/user/${userId}`);
-      
+
       set((state) => ({
         assignments: state.assignments.filter(
           assignment => !(assignment.ticketId === ticketId && assignment.userId === userId)
@@ -181,9 +206,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
         loading: false
       }));
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la suppression de l\'utilisateur du ticket',
-        loading: false 
+        loading: false
       });
       throw error;
     }
@@ -197,9 +222,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
       set({ assignmentStats: stats, loading: false });
       return stats;
     } catch (error: any) {
-      set({ 
+      set({
         error: error.response?.data?.message || 'Erreur lors de la récupération des statistiques',
-        loading: false 
+        loading: false
       });
       throw error;
     }

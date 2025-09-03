@@ -154,5 +154,14 @@ export const authController = {
     } catch (error: any) {
       return res.status(500).json({ error: error.message });
     }
+  },
+
+  async getUserSession(req: Request, res: Response) {
+    const { token } = req.params;
+
+    const session = await prisma?.session.findFirst({
+      where: {token: token!}
+    })
+    return res.json(session);
   }
 };

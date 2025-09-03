@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/authStore';
 export const useAuthentication = () => {
   const {
     user,
+    userId,
     token,
     refreshToken,
     isAuthenticated,
@@ -18,11 +19,13 @@ export const useAuthentication = () => {
     getProfile,
     clearError,
     setTokens,
+    getSession,
     clearAuth
   } = useAuthStore();
 
   return {
     user,
+    userId,
     token,
     refreshToken,
     isAuthenticated,
@@ -37,6 +40,7 @@ export const useAuthentication = () => {
     getProfile,
     clearError,
     setTokens,
+    getSession,
     clearAuth
   };
 };

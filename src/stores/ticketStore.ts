@@ -21,6 +21,7 @@ const baseURL = "http://localhost:4000/api/tickets";
 
 interface TicketState {
   tickets: Ticket[];
+  ticket: Ticket | null;
   currentTicket: (Ticket & { assignedTo: TicketAssignment[] }) | null;
   userTickets: Ticket[];
   loading: boolean;
@@ -47,6 +48,7 @@ interface TicketState {
 
 export const useTicketStore = create<TicketState>((set) => ({
   tickets: [],
+  ticket: null,
   currentTicket: null,
   userTickets: [],
   loading: false,
@@ -88,6 +90,7 @@ export const useTicketStore = create<TicketState>((set) => ({
       const newTicket = response.data;
       
       set((state) => ({
+        ticket: newTicket,
         tickets: [...state.tickets, newTicket],
         loading: false
       }));

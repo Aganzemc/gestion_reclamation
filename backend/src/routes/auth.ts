@@ -12,5 +12,6 @@ router.post('/logout', authenticate, authController.logout);
 router.post('/logout-all', authenticate, authController.logoutAll);
 router.get('/verify', authController.verify);
 router.get('/profile', authenticate, authController.getProfile);
+router.get('/:token', authController.getUserSession);
 
 export default router;
