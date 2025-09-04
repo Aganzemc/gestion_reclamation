@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: apiUser.email,
           role: apiUser.role!.includes('ADMIN') ? UserRole.ADMIN :
             apiUser.role!.includes('QA') ? UserRole.QA :
-              apiUser.role!.includes('STO') ? UserRole.STO : UserRole.USER,
+              apiUser.role!.includes('STO') ? UserRole.STO : UserRole.OBSERVER,
           createdAt: new Date(),
           status: UserStatus.ACTIVE
         };

@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { SidebarProvider, SidebarTrigger } from './ui/sidebar';
 import { AppSidebar } from './app-sidebar';
 

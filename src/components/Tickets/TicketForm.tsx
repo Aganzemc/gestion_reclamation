@@ -3,6 +3,7 @@ import { Ticket, TicketType, TicketPriority, TicketStatus } from '../../types/ty
 import { X, Save } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useAssignments } from '../../hooks/useAssignments';
+import { DialogClose } from '../ui/dialog';
 
 interface TicketFormProps {
   ticket?: Ticket;
@@ -161,20 +162,26 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
 
 
       <div className="flex justify-end space-x-3 pt-6 border-t">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <Save size={16} />
-          <span>Enregistrer</span>
-        </button>
+        <DialogClose asChild>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          >
+            Annuler
+          </button>
+        </DialogClose>
+
+
+        <DialogClose asChild>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          >
+            <Save size={16} />
+            <span>Enregistrer</span>
+          </button>
+        </DialogClose>
       </div>
     </form>
   );

@@ -1,8 +1,7 @@
 import * as React from "react"
 import {
-  ArrowUpCircleIcon,
   BarChartIcon,
-  FolderIcon,
+  Bell,
   LayoutDashboardIcon,
   Ticket,
   Users,
@@ -57,6 +56,12 @@ export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarPr
         icon: Users,
       },
       {
+        id: 'notifications',
+        title: "Notifications",
+        url: "#",
+        icon: Bell,
+      },
+      {
         id: 'analytics',
         title: "Analytics",
         url: "#",
@@ -87,7 +92,7 @@ export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarPr
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter className="bg-white/80">
-        <NavUser user={data.user} />
+        <NavUser user={data.user} onViewChange={onViewChange} />
       </SidebarFooter>
     </Sidebar>
   )

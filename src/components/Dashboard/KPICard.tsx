@@ -6,7 +6,7 @@ interface KPICardProps {
   value: string | number;
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
-  icon: LucideIcon;
+  icon: typeof LucideIcon;
   color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
 }
 
@@ -32,7 +32,7 @@ const KPICard: React.FC<KPICardProps> = ({
     neutral: 'text-gray-600'
   };
 
-  const [bgColor, textColor, cardBg] = colorClasses[color].split(' ');
+  const [bgColor, cardBg] = colorClasses[color].split(' ');
 
   return (
     <div className={`${cardBg} rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow`}>

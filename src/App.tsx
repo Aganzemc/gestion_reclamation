@@ -7,6 +7,7 @@ import TicketList from './components/Tickets/TicketList';
 import Analytics from './components/Analytics/Analytics';
 import UserManagement from './components/Users/UserManagement';
 import { LoginForm } from './components/login-form';
+import NotificationsPage from './components/notifications/Notifications';
 
 function AuthenticatedApp() {
   const { isAuthenticated } = useAuth();
@@ -26,6 +27,8 @@ function AuthenticatedApp() {
         return <Analytics />;
       case 'users':
         return <UserManagement />;
+      case 'notifications':
+        return <NotificationsPage/>
       default:
         return <Dashboard />;
     }

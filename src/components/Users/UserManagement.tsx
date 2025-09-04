@@ -12,7 +12,7 @@ const UserManagement: React.FC = () => {
   const { users, getUsers, createUser, updateUser } = useUsers()
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [_showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const handleAddUser = (newUser: User) => {
@@ -30,7 +30,7 @@ const UserManagement: React.FC = () => {
       case UserRole.ADMIN: return 'bg-red-100 text-red-800';
       case UserRole.QA: return 'bg-blue-100 text-blue-800';
       case UserRole.STO: return 'bg-green-100 text-green-800';
-      case UserRole.USER: return 'bg-gray-100 text-gray-800';
+      case UserRole.OBSERVER: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -39,7 +39,7 @@ const UserManagement: React.FC = () => {
       case UserRole.ADMIN: return <Shield size={16} />;
       case UserRole.QA: return <Users size={16} />;
       case UserRole.STO: return <Users size={16} />;
-      case UserRole.USER: return <Users size={16} />;
+      case UserRole.OBSERVER: return <Users size={16} />;
     }
   };
 
@@ -163,7 +163,7 @@ const UserManagement: React.FC = () => {
             <option value={UserRole.ADMIN}>Administrateur</option>
             <option value={UserRole.QA}>Équipe Qualité</option>
             <option value={UserRole.STO}>Équipe Opérationnelle</option>
-            <option value={UserRole.USER}>Observateur</option>
+            <option value={UserRole.OBSERVER}>Observateur</option>
           </select>
         </div>
       </div>

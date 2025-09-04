@@ -29,12 +29,14 @@ import { useAuth } from "../context/AuthContext"
 
 export function NavUser({
   user,
+  onViewChange
 }: {
   user: {
     name?: string
     email: string
     avatar?: string
-  }
+  },
+  onViewChange: (view: string) => void;
 }) {
   const { isMobile } = useSidebar()
   const { logout } = useAuth();
@@ -87,7 +89,9 @@ export function NavUser({
                 <UserCircleIcon />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                      onViewChange("notifications")
+                    }}>
                 <BellIcon />
                 Notifications
               </DropdownMenuItem>

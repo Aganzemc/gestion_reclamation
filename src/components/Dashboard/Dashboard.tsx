@@ -14,7 +14,6 @@ import {
   Cell
 } from 'recharts';
 import KPICard from './KPICard';
-import { mockKPIData } from '../../data/mockData';
 import {
   Ticket,
   Clock,
@@ -26,7 +25,6 @@ import { useTickets } from '../../hooks/useTickets';
 import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } from '../../lib/builTendanceTickets';
 
 const Dashboard: React.FC = () => {
-  const data = mockKPIData;
 
 
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
@@ -80,14 +78,14 @@ const Dashboard: React.FC = () => {
           icon={CheckCircle}
           color="green"
         />
-        <KPICard
+        {/* <KPICard
           title="Temps Moyen (jours)"
           value={data.tempsTraitement}
           change="Stable"
           changeType="neutral"
           icon={TrendingUp}
           color="purple"
-        />
+        /> */}
       </div>
 
       {/* Charts Row */}

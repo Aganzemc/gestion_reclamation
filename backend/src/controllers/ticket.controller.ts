@@ -38,6 +38,14 @@ export const ticketController = {
           }
         }
       });
+
+      await prisma.notification.create({
+        data: {
+          type: "SUCCESS", 
+          message: `vous avez créé le ticket ${title} avec succé`, 
+          userId: createdById
+        }
+      })
       
       res.status(201).json(ticket);
     } catch (error) {
@@ -187,6 +195,14 @@ export const ticketController = {
           }
         }
       });
+
+      await prisma.notification.create({
+        data: {
+          type: "INFO", 
+          message: `vous avez modifié un ticket ${title}`, 
+          userId: ticket.createdBy.id
+        }
+      })
       
       res.json(ticket);
     } catch (error) {
@@ -200,9 +216,27 @@ export const ticketController = {
     try {
       const { id } = req.params;
       
-      await prisma.ticket.delete({
-        where: { id }
+      const ticket = await prisma.ticket.delete({
+        where: { id },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+        }
       });
+
+      await prisma.notification.create({
+        data: {
+          type: "WARNING", 
+          message: `vous avez supprimé un ticket ${ticket.title}`, 
+          userId: ticket.createdBy.id
+        }
+      })
       
       res.json({ message: 'Ticket supprimé avec succès' });
     } catch (error) {
@@ -231,6 +265,14 @@ export const ticketController = {
           }
         }
       });
+
+      await prisma.notification.create({
+        data: {
+          type: "SUCCESS", 
+          message: `vous avez modifié le status du ticket ${ticket.title}`, 
+          userId: ticket.createdBy.id
+        }
+      })
       
       res.json(ticket);
     } catch (error) {

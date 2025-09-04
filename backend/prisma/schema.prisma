@@ -20,7 +20,7 @@ model User {
   password        String
   firstName       String             @map("first_name")
   lastName        String             @map("last_name")
-  role            UserRole           @default(USER)
+  role            UserRole           @default(OBSERVER)
   status          UserStatus         @default(ACTIVE)
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
@@ -93,8 +93,6 @@ model Session {
 // Enums
 enum UserRole {
   ADMIN
-  AGENT
-  USER
   QA
   STO
   OBSERVER

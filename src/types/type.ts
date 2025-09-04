@@ -3,8 +3,6 @@
 // Enums
 export enum UserRole {
   ADMIN = 'ADMIN',
-  AGENT = 'AGENT',
-  USER = 'USER',
   QA = 'QA',
   STO = 'STO',
   OBSERVER = 'OBSERVER'

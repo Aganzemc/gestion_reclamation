@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { User, UserRole, UserStatus } from '../../types/type';
+import { DialogClose } from '../ui/dialog';
 
 interface UserFormProps {
   user?: User;
@@ -13,7 +14,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
-    role: user?.role || UserRole.USER,
+    role: user?.role || UserRole.OBSERVER,
     status: user?.status ?? UserStatus.ACTIVE,
   });
 
@@ -84,7 +85,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
           <option value={UserRole.ADMIN}>Admin</option>
           <option value={UserRole.QA}>QA</option>
           <option value={UserRole.STO}>STO</option>
-          <option value={UserRole.USER}>Utilisateur</option>
+          <option value={UserRole.OBSERVER}>Observateur</option>
         </select>
       </div>
 
@@ -110,20 +111,28 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
 
       {/* Actions */}
       <div className="flex justify-end space-x-3 pt-6 border-t">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-        >
-          Annuler
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <Save size={16} />
-          <span>Enregistrer</span>
-        </button>
+
+
+        <DialogClose asChild>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+          >
+            Annuler
+          </button>
+        </DialogClose>
+
+
+        <DialogClose asChild>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          >
+            <Save size={16} />
+            <span>Enregistrer</span>
+          </button>
+        </DialogClose>
       </div>
     </form>
   );

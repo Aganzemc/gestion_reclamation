@@ -15,12 +15,11 @@ export function TeamPerformance() {
   const teamStats = useMemo(() => {
     if (!tickets.length || !users.length) return [];
 
-    const stats: Record<UserRole, { total: number; totalTime: number }> = {
+    // stats initialisés avec les rôles connus
+    const stats: Record<string, { total: number; totalTime: number }> = {
       QA: { total: 0, totalTime: 0 },
       STO: { total: 0, totalTime: 0 },
       ADMIN: { total: 0, totalTime: 0 },
-      AGENT: { total: 0, totalTime: 0 },
-      USER: { total: 0, totalTime: 0 },
       OBSERVER: { total: 0, totalTime: 0 },
     };
 
@@ -30,6 +29,12 @@ export function TeamPerformance() {
         if (!user?.role) return;
 
         const role = user.role as UserRole;
+
+        // si le rôle n'existe pas encore, on l’ajoute
+        if (!stats[role]) {
+          stats[role] = { total: 0, totalTime: 0 };
+        }
+
         stats[role].total += 1;
 
         if (ticket.createdAt && ticket.updatedAt) {
@@ -47,8 +52,9 @@ export function TeamPerformance() {
       .map(([role, data]) => ({
         role,
         total: data.total,
-        avgTime: (data.totalTime / data.total).toFixed(1),
-        satisfaction: (Math.random() * 1 + 4).toFixed(1), // en attendant d’avoir des vraies données
+        avgTime:
+          data.total > 0 ? (data.totalTime / data.total).toFixed(1) : "0",
+        satisfaction: (Math.random() * 1 + 4).toFixed(1), // placeholder
       }));
   }, [tickets, users]);
 

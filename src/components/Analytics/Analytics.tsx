@@ -12,7 +12,6 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { mockKPIData } from '../../data/mockData';
 import { TrendingUp, TrendingDown, Activity, Clock } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
 import { buildPerformanceData, buildWorkloadData, calculerKPIs, calculerRecurrence } from '../../lib/builTendanceTickets';
@@ -21,7 +20,6 @@ import { TeamPerformance } from '../TeamPerformance';
 
 
 const Analytics: React.FC = () => {
-  const data = mockKPIData;
   const { getTickets, tickets } = useTickets()
   useEffect(() => {
     getTickets()

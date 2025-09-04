@@ -1,31 +1,31 @@
 // controllers/assignmentController.ts
 import { Request, Response } from 'express';
-import {prisma} from '../lib/prisma';
+import { prisma } from '../lib/prisma';
 
 export const assignmentController = {
   // Assigner un ticket à un utilisateur
   async createAssignment(req: Request, res: Response) {
     try {
       const { ticketId, userId } = req.body;
-      
+
       // Vérifier que le ticket existe
       const ticket = await prisma.ticket.findUnique({
         where: { id: ticketId }
       });
-      
+
       if (!ticket) {
         return res.status(404).json({ error: 'Ticket non trouvé' });
       }
-      
+
       // Vérifier que l'utilisateur existe
       const user = await prisma.user.findUnique({
         where: { id: userId }
       });
-      
+
       if (!user) {
         return res.status(404).json({ error: 'Utilisateur non trouvé' });
       }
-      
+
       // Vérifier si l'assignation existe déjà
       const existingAssignment = await prisma.ticketAssignment.findUnique({
         where: {
@@ -35,11 +35,11 @@ export const assignmentController = {
           }
         }
       });
-      
+
       if (existingAssignment) {
         return res.status(409).json({ error: 'Cette assignation existe déjà' });
       }
-      
+
       const assignment = await prisma.ticketAssignment.create({
         data: {
           ticket: { connect: { id: ticketId } },
@@ -65,7 +65,15 @@ export const assignmentController = {
           }
         }
       });
-      
+
+      await prisma.notification.create({
+        data: {
+          type: "WARNING",
+          message: `Le ticket ${assignment.ticket.title} vous a été assigné`,
+          userId: assignment.user.id
+        }
+      })
+
       return res.status(201).json(assignment);
     } catch (error) {
       console.error(error);
@@ -77,14 +85,14 @@ export const assignmentController = {
   async getAssignments(req: Request, res: Response) {
     try {
       const { ticketId, userId, page = 1, limit = 20 } = req.query;
-      
+
       const where: any = {};
-      
+
       if (ticketId) where.ticketId = ticketId as string;
       if (userId) where.userId = userId as string;
-      
+
       const skip = (Number(page) - 1) * Number(limit);
-      
+
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
           where,
@@ -113,7 +121,7 @@ export const assignmentController = {
         }),
         prisma.ticketAssignment.count({ where })
       ]);
-      
+
       return res.json({
         assignments,
         pagination: {
@@ -133,7 +141,7 @@ export const assignmentController = {
   async getAssignmentById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
+
       const assignment = await prisma.ticketAssignment.findUnique({
         where: { id },
         include: {
@@ -160,11 +168,11 @@ export const assignmentController = {
           }
         }
       });
-      
+
       if (!assignment) {
         return res.status(404).json({ error: 'Assignation non trouvée' });
       }
-      
+
       return res.json(assignment);
     } catch (error) {
       console.error(error);
@@ -176,11 +184,11 @@ export const assignmentController = {
   async deleteAssignment(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      
+
       await prisma.ticketAssignment.delete({
         where: { id }
       });
-      
+
       res.json({ message: 'Assignation supprimée avec succès' });
     } catch (error) {
       console.error(error);
@@ -193,18 +201,18 @@ export const assignmentController = {
     try {
       const { ticketId } = req.params;
       const { page = 1, limit = 20 } = req.query;
-      
+
       // Vérifier que le ticket existe
       const ticket = await prisma.ticket.findUnique({
         where: { id: ticketId }
       });
-      
+
       if (!ticket) {
         return res.status(404).json({ error: 'Ticket non trouvé' });
       }
-      
+
       const skip = (Number(page) - 1) * Number(limit);
-      
+
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
           where: { ticketId: ticketId! },
@@ -226,7 +234,7 @@ export const assignmentController = {
         }),
         prisma.ticketAssignment.count({ where: { ticketId: ticketId! } })
       ]);
-      
+
       return res.json({
         assignments,
         pagination: {
@@ -247,18 +255,18 @@ export const assignmentController = {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;
-      
+
       // Vérifier que l'utilisateur existe
       const user = await prisma.user.findUnique({
         where: { id: userId! }
       });
-      
+
       if (!user) {
         return res.status(404).json({ error: 'Utilisateur non trouvé' });
       }
-      
+
       const skip = (Number(page) - 1) * Number(limit);
-      
+
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
           where: { userId: userId! },
@@ -280,7 +288,7 @@ export const assignmentController = {
         }),
         prisma.ticketAssignment.count({ where: { userId: userId! } })
       ]);
-      
+
       return res.json({
         assignments,
         pagination: {
@@ -300,7 +308,7 @@ export const assignmentController = {
   async removeUserFromTicket(req: Request, res: Response) {
     try {
       const { ticketId, userId } = req.params;
-      
+
       // Vérifier que l'assignation existe
       const assignment = await prisma.ticketAssignment.findUnique({
         where: {
@@ -310,15 +318,15 @@ export const assignmentController = {
           }
         }
       });
-      
+
       if (!assignment) {
         return res.status(404).json({ error: 'Assignation non trouvée' });
       }
-      
+
       await prisma.ticketAssignment.delete({
         where: { id: assignment.id }
       });
-      
+
       return res.json({ message: 'Utilisateur désassigné du ticket avec succès' });
     } catch (error) {
       console.error(error);
@@ -330,17 +338,17 @@ export const assignmentController = {
   async getAssignmentStats(req: Request, res: Response) {
     try {
       const { userId, startDate, endDate } = req.query;
-      
+
       const where: any = {};
-      
+
       if (userId) where.userId = userId as string;
-      
+
       if (startDate || endDate) {
         where.assignedAt = {};
         if (startDate) where.assignedAt.gte = new Date(startDate as string);
         if (endDate) where.assignedAt.lte = new Date(endDate as string);
       }
-      
+
       const stats = await prisma.ticketAssignment.groupBy({
         by: ['userId'],
         where,

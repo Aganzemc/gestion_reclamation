@@ -55,7 +55,7 @@ export const notificationController = {
       
       const skip = (Number(page) - 1) * Number(limit);
       
-      const [notifications, total] = await Promise.all([
+      const [notifications, _total] = await Promise.all([
         prisma.notification.findMany({
           where,
           skip,
@@ -75,15 +75,7 @@ export const notificationController = {
         prisma.notification.count({ where })
       ]);
       
-      return res.json({
-        notifications,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          pages: Math.ceil(total / Number(limit))
-        }
-      });
+      return res.json(notifications);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erreur serveur' });
@@ -190,7 +182,7 @@ export const notificationController = {
       
       const skip = (Number(page) - 1) * Number(limit);
       
-      const [notifications, total] = await Promise.all([
+      const [notifications, _total] = await Promise.all([
         prisma.notification.findMany({
           where,
           skip,
@@ -200,15 +192,7 @@ export const notificationController = {
         prisma.notification.count({ where })
       ]);
       
-      return res.json({
-        notifications,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          pages: Math.ceil(total / Number(limit))
-        }
-      });
+      return res.json(notifications);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erreur serveur' });
