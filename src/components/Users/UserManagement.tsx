@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Shield, Users, Search, Eye } from 'lucide-react';
+import {Shield, Users, Search, Eye } from 'lucide-react';
 import UserForm from './UserForm';
 import { useUsers } from '../../hooks/useUser';
 import { User, UserRole, UserStatus } from '../../types/type';
-import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
-import { Button } from '../ui/button';
 import { format } from "date-fns";
+import { useAuth } from '../../context/AuthContext';
 
 const UserManagement: React.FC = () => {
   const { users, getUsers, createUser, updateUser } = useUsers()
@@ -14,7 +13,7 @@ const UserManagement: React.FC = () => {
   const [filterRole, setFilterRole] = useState('');
   const [_showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-
+  const { user: currentUser } = useAuth();
   const handleAddUser = (newUser: User) => {
     createUser(newUser);
     setShowForm(false);
@@ -69,9 +68,13 @@ const UserManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-        <UserForm
-          onSave={handleAddUser}
-        />
+        {
+          (currentUser?.role === "ADMIN") && (
+            <UserForm
+              onSave={handleAddUser}
+            />
+          )
+        }
       </div>
 
       {/* Statistiques */}
@@ -229,10 +232,15 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      <UserForm
-                        user={user}
-                        onSave={handleUserUpdate}
-                      />
+                      {
+                        currentUser?.role === "ADMIN" && (
+                          <UserForm
+                            user={user}
+                            onSave={handleUserUpdate}
+                          />
+                        )
+                      }
+
                       <Drawer>
                         <DrawerTrigger asChild>
                           <button onClick={() => setEditingUser(user)} className="text-gray-600 hover:text-gray-700">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 import { Ticket } from '../types/type'; // adapte selon ton chemin
 
 // Styles du PDF
@@ -23,7 +23,7 @@ const TicketsPDF: React.FC<{ tickets: Ticket[] }> = ({ tickets }) => (
       <View style={styles.table}>
         {/* Header */}
         <View style={styles.tableRow}>
-          {['Référence', 'Titre', 'Type', 'Priorité', 'Statut', 'Assigné à', 'Date'].map((header) => (
+          {['Titre', 'Type', 'Priorité', 'Statut', 'Assigné à', 'Date'].map((header) => (
             <View style={styles.tableColHeader} key={header}>
               <Text style={styles.tableCellHeader}>{header}</Text>
             </View>
@@ -33,7 +33,6 @@ const TicketsPDF: React.FC<{ tickets: Ticket[] }> = ({ tickets }) => (
         {/* Rows */}
         {tickets.map((ticket) => (
           <View style={styles.tableRow} key={ticket.id}>
-            <View style={styles.tableCol}><Text style={styles.tableCell}>{ticket.id}</Text></View>
             <View style={styles.tableCol}><Text style={styles.tableCell}>{ticket.title}</Text></View>
             <View style={styles.tableCol}><Text style={styles.tableCell}>{ticket.type}</Text></View>
             <View style={styles.tableCol}><Text style={styles.tableCell}>{ticket.priority}</Text></View>

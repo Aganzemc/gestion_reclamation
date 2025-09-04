@@ -5,7 +5,6 @@ import { Ticket } from '../types/type'; // ou le chemin où est défini ton type
 export const exportTicketsToExcel = (tickets: Ticket[]) => {
   // Préparer les données pour Excel
   const data = tickets.map(ticket => ({
-    Référence: ticket.id,
     Titre: ticket.title,
     Type: ticket.type,
     Priorité: ticket.priority,

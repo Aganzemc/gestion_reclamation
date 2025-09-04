@@ -16,6 +16,7 @@ import TicketsPDF from '../../lib/pdf';
 import { DownLoadPdf } from '../../lib/downloadPdf';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { format } from "date-fns";
+import { useAuth } from '../../context/AuthContext';
 
 
 const TicketList: React.FC = () => {
@@ -26,6 +27,7 @@ const TicketList: React.FC = () => {
   const [_showForm, setShowForm] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<Ticket | null>(null)
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -122,9 +124,14 @@ const TicketList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Réclamations</h1>
-        <TicketForm
-          onSave={handleCreateTicket}
-        />
+        {
+          user?.role !== "OBSERVER" && (
+            <TicketForm
+              onSave={handleCreateTicket}
+            />
+          )
+        }
+
       </div>
 
       {/* Filters */}
@@ -218,9 +225,6 @@ const TicketList: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Référence
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Titre
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -246,9 +250,6 @@ const TicketList: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredTickets.map((ticket) => (
                 <tr key={ticket.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                    {"12"}
-                  </td>
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                     {ticket.title}
                   </td>
@@ -278,11 +279,14 @@ const TicketList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      <TicketForm
-                        ticket={ticket}
-                        onSave={handleEditTicket}
-                      />
-
+                      {
+                        user?.role !== "OBSERVER" && (
+                          <TicketForm
+                            ticket={ticket}
+                            onSave={handleEditTicket}
+                          />
+                        )
+                      }
                       <Drawer>
                         <DrawerTrigger asChild>
                           <button onClick={() => setCurrentTicket(ticket)} className="text-gray-600 hover:text-gray-700">
