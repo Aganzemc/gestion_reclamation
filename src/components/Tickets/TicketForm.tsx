@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Ticket, TicketType, TicketPriority, TicketStatus } from '../../types/type';
-import { X, Save } from 'lucide-react';
+import { X, Save, Plus, Edit } from 'lucide-react';
 import { useUserStore } from '../../stores/userStore';
 import { useAssignments } from '../../hooks/useAssignments';
-import { DialogClose } from '../ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../ui/dialog';
+import { Button } from '../ui/button';
 
 interface TicketFormProps {
   ticket?: Ticket;
   onSave: (ticketData: Ticket) => void;
-  onCancel: () => void;
 }
 
-const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => {
+const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
   const { users, getUsers } = useUserStore()
   const { addUser, removeUser, assignedUsers, } = useAssignments()
 
@@ -58,132 +58,149 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onCancel }) => 
 
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Titre *
-        </label>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Titre de la réclamation"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Description *
-        </label>
-        <textarea
-          value={formData.description!}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Description détaillée de la réclamation"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Type
-          </label>
-          <select
-            value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value as TicketType })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    <Dialog>
+      <DialogTrigger asChild>
+        {ticket ? (
+          <button
+            className="text-blue-600 hover:text-blue-700"
           >
-            <option value={TicketType.QUALITE}>Qualité</option>
-            <option value={TicketType.INCIDENT}>Incident</option>
-            <option value={TicketType.OPERATIONNEL}>Opérationnel</option>
-          </select>
-        </div>
+            <Edit size={16} />
+          </button>
+        ) : (
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <Plus size={16} />
+            <span>Nouvelle réclamation</span>
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="h-[450px] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Titre *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Titre de la réclamation"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Priorité
-          </label>
-          <select
-            value={formData.priority}
-            onChange={(e) => setFormData({ ...formData, priority: e.target.value as TicketPriority })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value={TicketPriority.LOW}>Basse</option>
-            <option value={TicketPriority.MEDIUM}>Moyenne</option>
-            <option value={TicketPriority.HIGH}>Haute</option>
-            <option value={TicketPriority.URGENT}>Critique</option>
-          </select>
-        </div>
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              value={formData.description!}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Description détaillée de la réclamation"
+              required
+            />
+          </div>
 
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Assignation
-        </label>
-        <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
-          {users.map((user) => {
-            const isChecked =
-              (assignedUsers.some((a) => a.userId === user.id) ||
-                ticket?.assignedTo?.some((a) => a.userId === user.id)) ||
-              false;
-
-            return (
-              <label
-                key={user.id}
-                className="flex items-center gap-3 py-1 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={(e) =>
-                    handleAssigneeChange(user.id!, e.target.checked)
-                  }
-                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">
-                    {user.firstName} {user.lastName}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {user.email} — {user.role}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type
               </label>
-            );
-          })}
-        </div>
-      </div>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as TicketType })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value={TicketType.QUALITE}>Qualité</option>
+                <option value={TicketType.INCIDENT}>Incident</option>
+                <option value={TicketType.OPERATIONNEL}>Opérationnel</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Priorité
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as TicketPriority })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value={TicketPriority.LOW}>Basse</option>
+                <option value={TicketPriority.MEDIUM}>Moyenne</option>
+                <option value={TicketPriority.HIGH}>Haute</option>
+                <option value={TicketPriority.URGENT}>Critique</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Assignation
+            </label>
+            <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
+              {users.map((user) => {
+                const isChecked =
+                  (assignedUsers.some((a) => a.userId === user.id) ||
+                    ticket?.assignedTo?.some((a) => a.userId === user.id)) ||
+                  false;
+
+                return (
+                  <label
+                    key={user.id}
+                    className="flex items-center gap-3 py-1 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleAssigneeChange(user.id!, e.target.checked)
+                      }
+                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {user.email} — {user.role}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
 
 
 
-      <div className="flex justify-end space-x-3 pt-6 border-t">
-        <DialogClose asChild>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Annuler
-          </button>
-        </DialogClose>
+          <div className="flex justify-end space-x-3 pt-6 border-t">
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+            </DialogClose>
 
 
-        <DialogClose asChild>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-          >
-            <Save size={16} />
-            <span>Enregistrer</span>
-          </button>
-        </DialogClose>
-      </div>
-    </form>
+            <DialogClose asChild>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+              >
+                <Save size={16} />
+                <span>Enregistrer</span>
+              </button>
+            </DialogClose>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

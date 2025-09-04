@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Ticket, TicketStatus, TicketType, TicketPriority } from '../../types/type';
 import TicketForm from './TicketForm';
 import {
-  Plus,
-  Edit,
   Eye,
   Download,
   Search,
@@ -11,7 +9,6 @@ import {
 import { useTicketStore } from '../../stores/ticketStore';
 import { useAuthentication } from '../../hooks/useAuth';
 import { useAssignments } from '../../hooks/useAssignments';
-import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
 import { exportTicketsToExcel } from '../../lib/excel';
@@ -125,20 +122,9 @@ const TicketList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Réclamations</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-              <Plus size={16} />
-              <span>Nouvelle réclamation</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="h-[450px] overflow-y-auto">
-            <TicketForm
-              onSave={handleCreateTicket}
-              onCancel={() => setShowForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <TicketForm
+          onSave={handleCreateTicket}
+        />
       </div>
 
       {/* Filters */}
@@ -292,26 +278,10 @@ const TicketList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button
-                            onClick={() => setEditingTicket(ticket)}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <Edit size={16} />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent className="h-[450px] overflow-y-auto">
-                          {editingTicket && (
-                            <TicketForm
-                              ticket={editingTicket}
-                              onSave={handleEditTicket}
-                              onCancel={() => setEditingTicket(null)}
-                            />
-                          )}
-                        </DialogContent>
-                      </Dialog>
+                      <TicketForm
+                        ticket={ticket}
+                        onSave={handleEditTicket}
+                      />
 
                       <Drawer>
                         <DrawerTrigger asChild>
@@ -322,101 +292,101 @@ const TicketList: React.FC = () => {
                         <DrawerContent className="min-h-[85%] max-h-[85%] overflow-auto bg-white p-6 space-y-6">
                           {currentTicket && (
                             <>
-                            {/* Header */}
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Détails de la réclamation</h2>
-                            <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
-                          </div>
+                              {/* Header */}
+                              <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Détails de la réclamation</h2>
+                                <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
+                              </div>
 
-                          {/* Infos principales */}
-                          <div className="space-y-4 border-b border-gray-200 pb-4">
-                            <div>
-                              <span className="font-semibold text-gray-700">Titre:</span>
-                              <p className="text-gray-900">{currentTicket.title}</p>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-700">Description:</span>
-                              <p className="mt-1 text-gray-600">
-                                {currentTicket.description || "Aucune description"}
-                              </p>
-                            </div>
-                          </div>
+                              {/* Infos principales */}
+                              <div className="space-y-4 border-b border-gray-200 pb-4">
+                                <div>
+                                  <span className="font-semibold text-gray-700">Titre:</span>
+                                  <p className="text-gray-900">{currentTicket.title}</p>
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Description:</span>
+                                  <p className="mt-1 text-gray-600">
+                                    {currentTicket.description || "Aucune description"}
+                                  </p>
+                                </div>
+                              </div>
 
-                          {/* Badges */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                              <span className="font-semibold text-gray-700">Type:</span>
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getTypeColor(
-                                  currentTicket.type!
-                                )}`}
-                              >
-                                {currentTicket.type}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-700">Priorité:</span>
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getPriorityColor(
-                                  currentTicket.priority!
-                                )}`}
-                              >
-                                {currentTicket.priority}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-700">Statut:</span>
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getStatusColor(
-                                  currentTicket.status!
-                                )}`}
-                              >
-                                {currentTicket.status}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Dates */}
-                          <div className="space-y-2 text-sm text-gray-600">
-                            <div>
-                              <span className="font-semibold text-gray-700">Créé le:</span>{" "}
-                              {currentTicket.createdAt
-                                ? format(new Date(currentTicket.createdAt), "dd/MM/yyyy HH:mm")
-                                : "-"}
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-700">Mis à jour le:</span>{" "}
-                              {currentTicket.updatedAt
-                                ? format(new Date(currentTicket.updatedAt), "dd/MM/yyyy HH:mm")
-                                : "-"}
-                            </div>
-                          </div>
-
-                          {/* Assignations */}
-                          <div className="space-y-2">
-                            <h3 className="text-lg font-semibold text-gray-900">Assigné à</h3>
-                            {currentTicket.assignedTo && currentTicket.assignedTo.length > 0 ? (
-                              <ul className="space-y-2">
-                                {currentTicket.assignedTo.map(assign => (
-                                  <li
-                                    key={assign.id}
-                                    className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                              {/* Badges */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                  <span className="font-semibold text-gray-700">Type:</span>
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getTypeColor(
+                                      currentTicket.type!
+                                    )}`}
                                   >
-                                    <span className="text-gray-800">
-                                      {assign.user?.firstName} {assign.user?.lastName}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                      {assign.assignedAt
-                                        ? format(new Date(assign.assignedAt), "dd/MM/yyyy")
-                                        : ""}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-gray-500 text-sm">Aucun utilisateur assigné</p>
-                            )}
-                          </div>
+                                    {currentTicket.type}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Priorité:</span>
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getPriorityColor(
+                                      currentTicket.priority!
+                                    )}`}
+                                  >
+                                    {currentTicket.priority}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Statut:</span>
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getStatusColor(
+                                      currentTicket.status!
+                                    )}`}
+                                  >
+                                    {currentTicket.status}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Dates */}
+                              <div className="space-y-2 text-sm text-gray-600">
+                                <div>
+                                  <span className="font-semibold text-gray-700">Créé le:</span>{" "}
+                                  {currentTicket.createdAt
+                                    ? format(new Date(currentTicket.createdAt), "dd/MM/yyyy HH:mm")
+                                    : "-"}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Mis à jour le:</span>{" "}
+                                  {currentTicket.updatedAt
+                                    ? format(new Date(currentTicket.updatedAt), "dd/MM/yyyy HH:mm")
+                                    : "-"}
+                                </div>
+                              </div>
+
+                              {/* Assignations */}
+                              <div className="space-y-2">
+                                <h3 className="text-lg font-semibold text-gray-900">Assigné à</h3>
+                                {currentTicket.assignedTo && currentTicket.assignedTo.length > 0 ? (
+                                  <ul className="space-y-2">
+                                    {currentTicket.assignedTo.map(assign => (
+                                      <li
+                                        key={assign.id}
+                                        className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                                      >
+                                        <span className="text-gray-800">
+                                          {assign.user?.firstName} {assign.user?.lastName}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                          {assign.assignedAt
+                                            ? format(new Date(assign.assignedAt), "dd/MM/yyyy")
+                                            : ""}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-gray-500 text-sm">Aucun utilisateur assigné</p>
+                                )}
+                              </div>
                             </>
                           )}
                         </DrawerContent>
@@ -430,22 +400,6 @@ const TicketList: React.FC = () => {
           </table>
         </div>
       </div>
-
-      {/* Forms */}
-      {/* {showForm && (
-        <TicketForm
-          onSave={handleCreateTicket}
-          onCancel={() => setShowForm(false)}
-        />
-      )} */}
-
-      {editingTicket && (
-        <TicketForm
-          ticket={editingTicket}
-          onSave={handleEditTicket}
-          onCancel={() => setEditingTicket(null)}
-        />
-      )}
     </div>
   );
 };

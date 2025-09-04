@@ -69,20 +69,9 @@ const UserManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-              <Plus size={16} />
-              <span>Nouvel utilisateur</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="h-[450px] overflow-y-auto">
-            <UserForm
-              onSave={handleAddUser}
-              onCancel={() => setShowForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <UserForm
+          onSave={handleAddUser}
+        />
       </div>
 
       {/* Statistiques */}
@@ -240,27 +229,10 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button
-                            onClick={() => setEditingUser(user)}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <Edit size={16} />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent className="h-[450px] overflow-y-auto">
-                          {editingUser && (
-                            <UserForm
-                              user={user}
-                              onSave={handleUserUpdate}
-                              onCancel={() => setShowForm(false)}
-                            />
-                          )}
-                        </DialogContent>
-                      </Dialog>
-
+                      <UserForm
+                        user={user}
+                        onSave={handleUserUpdate}
+                      />
                       <Drawer>
                         <DrawerTrigger asChild>
                           <button onClick={() => setEditingUser(user)} className="text-gray-600 hover:text-gray-700">
