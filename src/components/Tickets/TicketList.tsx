@@ -11,13 +11,23 @@ import {
 import { useTicketStore } from '../../stores/ticketStore';
 import { useAuthentication } from '../../hooks/useAuth';
 import { useAssignments } from '../../hooks/useAssignments';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
+import { exportTicketsToExcel } from '../../lib/excel';
+import TicketsPDF from '../../lib/pdf';
+import { DownLoadPdf } from '../../lib/downloadPdf';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { format } from "date-fns";
+
 
 const TicketList: React.FC = () => {
   const { tickets, getTickets, createTicket, updateTicket } = useTicketStore()
   const { getSession, userId } = useAuthentication()
   // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
   const { assignedUsers, createAssignment, reset } = useAssignments()
-  const [showForm, setShowForm] = useState(false);
+  const [_showForm, setShowForm] = useState(false);
+  const [currentTicket, setCurrentTicket] = useState<Ticket | null>(null)
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -25,6 +35,13 @@ const TicketList: React.FC = () => {
     type: '',
     priority: ''
   });
+
+  const onClickDownload = (tickets: Ticket[]) => {
+    DownLoadPdf({
+      pdfElement: <TicketsPDF tickets={tickets} />,
+      filename: `ticket.pdf`,
+    });
+  };
 
   useEffect(() => {
     getTickets()
@@ -56,12 +73,12 @@ const TicketList: React.FC = () => {
         description: ticketData.description ?? undefined
       })
       assignedUsers.forEach(user => {
-          createAssignment({
-            ticketId: updatedTicket.id!,
-            userId: user.userId
-          })
+        createAssignment({
+          ticketId: updatedTicket.id!,
+          userId: user.userId
         })
-        reset()
+      })
+      reset()
       setEditingTicket(null);
     }
   };
@@ -108,13 +125,20 @@ const TicketList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Réclamations</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <Plus size={16} />
-          <span>Nouvelle réclamation</span>
-        </button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+              <Plus size={16} />
+              <span>Nouvelle réclamation</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="h-[450px] overflow-y-auto">
+            <TicketForm
+              onSave={handleCreateTicket}
+              onCancel={() => setShowForm(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filters */}
@@ -170,10 +194,34 @@ const TicketList: React.FC = () => {
           <div className="text-sm text-gray-600">
             {filteredTickets.length} réclamation{filteredTickets.length > 1 ? 's' : ''} trouvée{filteredTickets.length > 1 ? 's' : ''}
           </div>
-          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
-            <Download size={16} />
-            <span>Exporter</span>
-          </button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <Download size={16} />
+                <span>Exporter</span>
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Voulez vous axporter vers:</AlertDialogTitle>
+                <AlertDialogDescription className='flex justify-center gap-10 items-center py-6'>
+                  <Button onClick={() => onClickDownload(filteredTickets)} className="flex items-center space-x-2 bg-red-500 text-white">
+                    <Download size={16} />
+                    <span>PDF</span>
+                  </Button>
+                  <Button onClick={() => exportTicketsToExcel(filteredTickets)} className="flex items-center space-x-2 bg-blue-500 text-white">
+                    <Download size={16} />
+                    <span>EXCEL</span>
+                  </Button>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
@@ -213,7 +261,7 @@ const TicketList: React.FC = () => {
               {filteredTickets.map((ticket) => (
                 <tr key={ticket.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                    {ticket.id}
+                    {"12"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                     {ticket.title}
@@ -244,15 +292,136 @@ const TicketList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => setEditingTicket(ticket)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-700">
-                        <Eye size={16} />
-                      </button>
+
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            onClick={() => setEditingTicket(ticket)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="h-[450px] overflow-y-auto">
+                          {editingTicket && (
+                            <TicketForm
+                              ticket={editingTicket}
+                              onSave={handleEditTicket}
+                              onCancel={() => setEditingTicket(null)}
+                            />
+                          )}
+                        </DialogContent>
+                      </Dialog>
+
+                      <Drawer>
+                        <DrawerTrigger asChild>
+                          <button onClick={() => setCurrentTicket(ticket)} className="text-gray-600 hover:text-gray-700">
+                            <Eye size={16} />
+                          </button>
+                        </DrawerTrigger>
+                        <DrawerContent className="min-h-[85%] max-h-[85%] overflow-auto bg-white p-6 space-y-6">
+                          {currentTicket && (
+                            <>
+                            {/* Header */}
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Détails de la réclamation</h2>
+                            <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
+                          </div>
+
+                          {/* Infos principales */}
+                          <div className="space-y-4 border-b border-gray-200 pb-4">
+                            <div>
+                              <span className="font-semibold text-gray-700">Titre:</span>
+                              <p className="text-gray-900">{currentTicket.title}</p>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700">Description:</span>
+                              <p className="mt-1 text-gray-600">
+                                {currentTicket.description || "Aucune description"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Badges */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                              <span className="font-semibold text-gray-700">Type:</span>
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getTypeColor(
+                                  currentTicket.type!
+                                )}`}
+                              >
+                                {currentTicket.type}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700">Priorité:</span>
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getPriorityColor(
+                                  currentTicket.priority!
+                                )}`}
+                              >
+                                {currentTicket.priority}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700">Statut:</span>
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ml-2 ${getStatusColor(
+                                  currentTicket.status!
+                                )}`}
+                              >
+                                {currentTicket.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Dates */}
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div>
+                              <span className="font-semibold text-gray-700">Créé le:</span>{" "}
+                              {currentTicket.createdAt
+                                ? format(new Date(currentTicket.createdAt), "dd/MM/yyyy HH:mm")
+                                : "-"}
+                            </div>
+                            <div>
+                              <span className="font-semibold text-gray-700">Mis à jour le:</span>{" "}
+                              {currentTicket.updatedAt
+                                ? format(new Date(currentTicket.updatedAt), "dd/MM/yyyy HH:mm")
+                                : "-"}
+                            </div>
+                          </div>
+
+                          {/* Assignations */}
+                          <div className="space-y-2">
+                            <h3 className="text-lg font-semibold text-gray-900">Assigné à</h3>
+                            {currentTicket.assignedTo && currentTicket.assignedTo.length > 0 ? (
+                              <ul className="space-y-2">
+                                {currentTicket.assignedTo.map(assign => (
+                                  <li
+                                    key={assign.id}
+                                    className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                                  >
+                                    <span className="text-gray-800">
+                                      {assign.user?.firstName} {assign.user?.lastName}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {assign.assignedAt
+                                        ? format(new Date(assign.assignedAt), "dd/MM/yyyy")
+                                        : ""}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-gray-500 text-sm">Aucun utilisateur assigné</p>
+                            )}
+                          </div>
+                            </>
+                          )}
+                        </DrawerContent>
+
+                      </Drawer>
                     </div>
                   </td>
                 </tr>
@@ -263,12 +432,12 @@ const TicketList: React.FC = () => {
       </div>
 
       {/* Forms */}
-      {showForm && (
+      {/* {showForm && (
         <TicketForm
           onSave={handleCreateTicket}
           onCancel={() => setShowForm(false)}
         />
-      )}
+      )} */}
 
       {editingTicket && (
         <TicketForm

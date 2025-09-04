@@ -47,7 +47,17 @@ export const userController = {
           lastName: true,
           role: true,
           status: true,
-          createdAt: true
+          createdAt: true,
+          assignedTickets: true,
+          tickets: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              priority: true,
+              createdAt: true
+            }
+          }
         },
         orderBy: { createdAt: 'desc' }
       });
@@ -74,6 +84,7 @@ export const userController = {
           status: true,
           createdAt: true,
           updatedAt: true,
+          assignedTickets: true,
           tickets: {
             select: {
               id: true,
@@ -121,9 +132,9 @@ export const userController = {
         }
       });
       
-      res.json(user);
+      return res.json(user);
     } catch (error) {
-      res.status(400).json({ error: 'Erreur de mise à jour' });
+      return res.status(400).json({ error: 'Erreur de mise à jour' });
     }
   },
 

@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Edit, Shield, Users, Search } from 'lucide-react';
+import { Plus, Edit, Shield, Users, Search, Eye } from 'lucide-react';
 import UserForm from './UserForm';
 import { useUsers } from '../../hooks/useUser';
 import { User, UserRole, UserStatus } from '../../types/type';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
+import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer';
+import { Button } from '../ui/button';
+import { format } from "date-fns";
 
 const UserManagement: React.FC = () => {
   const { users, getUsers, createUser, updateUser } = useUsers()
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const handleAddUser = (newUser: User) => {
     createUser(newUser);
@@ -18,6 +23,7 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     getUsers();
   }, [users])
+
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
@@ -53,16 +59,30 @@ const UserManagement: React.FC = () => {
     });
   };
 
+  const handleUserUpdate = async (EditeUser: User) => {
+    if (editingUser) {
+      await updateUser(editingUser.id!, EditeUser);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-          <Plus size={16} />
-          <span>Nouvel utilisateur</span>
-        </button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+              <Plus size={16} />
+              <span>Nouvel utilisateur</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="h-[450px] overflow-y-auto">
+            <UserForm
+              onSave={handleAddUser}
+              onCancel={() => setShowForm(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Statistiques */}
@@ -211,17 +231,122 @@ const UserManagement: React.FC = () => {
                     <button
                       onClick={() => toggleUserStatus(user.id!)}
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === "ACTIVE"
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
                         }`}
                     >
                       {user.status ? 'ACTIVE' : 'INACTIVE'}
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-blue-600 hover:text-blue-700 mr-3">
-                      <Edit size={16} />
-                    </button>
+                    <div className="flex space-x-2">
+
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            onClick={() => setEditingUser(user)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="h-[450px] overflow-y-auto">
+                          {editingUser && (
+                            <UserForm
+                              user={user}
+                              onSave={handleUserUpdate}
+                              onCancel={() => setShowForm(false)}
+                            />
+                          )}
+                        </DialogContent>
+                      </Dialog>
+
+                      <Drawer>
+                        <DrawerTrigger asChild>
+                          <button onClick={() => setEditingUser(user)} className="text-gray-600 hover:text-gray-700">
+                            <Eye size={16} />
+                          </button>
+                        </DrawerTrigger>
+                        <DrawerContent className="min-h-[85%] max-h-[85%] overflow-auto bg-white p-6 space-y-6">
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-bold text-gray-900">Profil Utilisateur</h2>
+                          </div>
+
+                          {editingUser && (
+                            <>
+                              {/* Informations principales */}
+                              <div className="space-y-4 border-b border-gray-200 pb-4">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                                  <span className="font-semibold text-gray-700">Nom complet:</span>
+                                  <span className="text-gray-900">{editingUser.firstName} {editingUser.lastName || '-'}</span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                                  <span className="font-semibold text-gray-700">Email:</span>
+                                  <span className="text-gray-900">{editingUser.email}</span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                                  <span className="font-semibold text-gray-700">Rôle:</span>
+                                  <span className="text-gray-900">{editingUser.role || 'Non défini'}</span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                                  <span className="font-semibold text-gray-700">Statut:</span>
+                                  <span className="text-gray-900">{editingUser.status || 'Inconnu'}</span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                                  <span className="font-semibold text-gray-700">Créé le:</span>
+                                  <span className="text-gray-900">{editingUser.createdAt ? format(new Date(editingUser.createdAt), 'dd/MM/yyyy') : '-'}</span>
+                                </div>
+                              </div>
+
+                              {/* Tickets créés */}
+                              <div className="space-y-2">
+                                <h3 className="text-lg font-semibold text-gray-900">Tickets créés</h3>
+                                {editingUser.tickets && editingUser.tickets.length > 0 ? (
+                                  <ul className="space-y-2 max-h-48 overflow-y-auto">
+                                    {editingUser.tickets.map(ticket => (
+                                      <li key={ticket.id} className="p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition">
+                                        <div className="font-semibold text-gray-800">{ticket.title}</div>
+                                        <div className="text-gray-600 text-sm truncate">{ticket.description || 'Aucune description'}</div>
+                                        <div className="flex justify-between mt-1 text-xs text-gray-500">
+                                          <span>{ticket.type || '-'}</span>
+                                          <span>{ticket.priority || '-'}</span>
+                                          <span>{ticket.status || '-'}</span>
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-gray-500 text-sm">Aucun ticket créé</p>
+                                )}
+                              </div>
+
+                              {/* Tickets assignés */}
+                              <div className="space-y-2">
+                                <h3 className="text-lg font-semibold text-gray-900">Tickets assignés</h3>
+                                {editingUser.assignedTickets && editingUser.assignedTickets.length > 0 ? (
+                                  <ul className="space-y-2 max-h-48 overflow-y-auto">
+                                    {editingUser.assignedTickets.map(assign => (
+                                      <li key={assign.id} className="p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition">
+                                        <div className="font-semibold text-gray-800">{assign.ticket?.title || '-'}</div>
+                                        <div className="text-gray-600 text-sm truncate">{assign.ticket?.description || 'Aucune description'}</div>
+                                        <div className="flex justify-between mt-1 text-xs text-gray-500">
+                                          <span>{assign.ticket?.type || '-'}</span>
+                                          <span>{assign.ticket?.priority || '-'}</span>
+                                          <span>{assign.ticket?.status || '-'}</span>
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-gray-500 text-sm">Aucun ticket assigné</p>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </DrawerContent>
+                      </Drawer>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -229,12 +354,7 @@ const UserManagement: React.FC = () => {
           </table>
         </div>
       </div>
-      {showForm && (
-        <UserForm
-          onSave={handleAddUser}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
+
     </div>
   );
 };

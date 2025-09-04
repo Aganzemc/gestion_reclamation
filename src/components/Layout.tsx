@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
     <>
       <SidebarProvider>
         <AppSidebar onViewChange={onViewChange} currentView={currentView} />
-        <main className='md:px-5 px-2 overflow-hidden'>
+        <main className='md:px-5 px-2 overflow-hidden w-full'>
           <SidebarTrigger />
           {children}
         </main>

@@ -5,6 +5,7 @@ import {
   FolderIcon,
   LayoutDashboardIcon,
   Ticket,
+  Users,
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -18,132 +19,55 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar"
+import { useAuth } from "../context/AuthContext"
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   onViewChange: (view: string) => void;
   currentView: string;
 }
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      id: 'dashboard',
-      title: "Tableau de bord",
-      url: "#",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      id: 'tickets',
-      title: "Réclamations",
-      url: "#",
-      icon: Ticket,
-    },
-    {
-      id: 'users',
-      title: "Utilisateurs",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      id: 'analytics',
-      title: "Analytics",
-      url: "#",
-      icon: BarChartIcon,
-    }
-  ],
-  // navClouds: [
-  //   {
-  //     title: "Capture",
-  //     icon: CameraIcon,
-  //     isActive: true,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Proposal",
-  //     icon: FileTextIcon,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Prompts",
-  //     icon: FileCodeIcon,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  // ],
-  // navSecondary: [
-  //   {
-  //     title: "Settings",
-  //     url: "#",
-  //     icon: SettingsIcon,
-  //   },
-  //   {
-  //     title: "Get Help",
-  //     url: "#",
-  //     icon: HelpCircleIcon,
-  //   },
-  //   {
-  //     title: "Search",
-  //     url: "#",
-  //     icon: SearchIcon,
-  //   },
-  // ],
-  // documents: [
-  //   {
-  //     name: "Data Library",
-  //     url: "#",
-  //     icon: DatabaseIcon,
-  //   },
-  //   {
-  //     name: "Reports",
-  //     url: "#",
-  //     icon: ClipboardListIcon,
-  //   },
-  //   {
-  //     name: "Word Assistant",
-  //     url: "#",
-  //     icon: FileIcon,
-  //   },
-  // ],
-}
 
-export function AppSidebar({onViewChange, currentView, ...props }: AppSidebarProps) {
+
+export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarProps) {
+  const { user } = useAuth();
+
+  const data = {
+    user: {
+      name: user?.firstName,
+      email: user?.email!,
+      avatar: user?.firstName,
+    },
+    navMain: [
+      {
+        id: 'dashboard',
+        title: "Tableau de bord",
+        url: "#",
+        icon: LayoutDashboardIcon,
+      },
+      {
+        id: 'tickets',
+        title: "Réclamations",
+        url: "#",
+        icon: Ticket,
+      },
+      {
+        id: 'users',
+        title: "Utilisateurs",
+        url: "#",
+        icon: Users,
+      },
+      {
+        id: 'analytics',
+        title: "Analytics",
+        url: "#",
+        icon: BarChartIcon,
+      }
+    ],
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="py-6">
+      <SidebarHeader className="py-6 bg-white/80">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -157,12 +81,12 @@ export function AppSidebar({onViewChange, currentView, ...props }: AppSidebarPro
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-white/80">
         <NavMain items={data.navMain} onViewChange={onViewChange} />
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-white/80">
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>

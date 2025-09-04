@@ -1,11 +1,11 @@
-import React from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import React, { useEffect, useMemo } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
   Line,
@@ -14,31 +14,32 @@ import {
 } from 'recharts';
 import { mockKPIData } from '../../data/mockData';
 import { TrendingUp, TrendingDown, Activity, Clock } from 'lucide-react';
+import { useTickets } from '../../hooks/useTickets';
+import { buildPerformanceData, buildWorkloadData, calculerKPIs, calculerRecurrence } from '../../lib/builTendanceTickets';
+import { Ticket, UserRole } from '../../types/type';
+import { TeamPerformance } from '../TeamPerformance';
+
 
 const Analytics: React.FC = () => {
   const data = mockKPIData;
+  const { getTickets, tickets } = useTickets()
+  useEffect(() => {
+    getTickets()
+  }, [])
+
 
   // Données de performance historique
-  const performanceData = [
-    { periode: 'S1', resolutionTime: 5.2, satisfaction: 78 },
-    { periode: 'S2', resolutionTime: 4.8, satisfaction: 82 },
-    { periode: 'S3', resolutionTime: 4.5, satisfaction: 85 },
-    { periode: 'S4', resolutionTime: 4.2, satisfaction: 88 },
-  ];
+  const performanceData = buildPerformanceData(tickets);
 
   // Données de charge de travail
-  const workloadData = [
-    { jour: 'Lun', nouveau: 12, ferme: 8, encours: 15 },
-    { jour: 'Mar', nouveau: 15, ferme: 11, encours: 13 },
-    { jour: 'Mer', nouveau: 9, ferme: 14, encours: 12 },
-    { jour: 'Jeu', nouveau: 18, ferme: 9, encours: 16 },
-    { jour: 'Ven', nouveau: 14, ferme: 16, encours: 10 },
-    { jour: 'Sam', nouveau: 6, ferme: 4, encours: 8 },
-    { jour: 'Dim', nouveau: 3, ferme: 2, encours: 5 }
-  ];
+  const workloadData = buildWorkloadData(tickets);
+
+  const { tauxResolution, evolutionResolution } = calculerKPIs(tickets);
+  const { taux, evolution } = calculerRecurrence(tickets);
+
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Analyses et Indicateurs</h1>
         <div className="flex space-x-2">
@@ -50,14 +51,15 @@ const Analytics: React.FC = () => {
 
       {/* Indicateurs de performance */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white md:col-span-2 rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Taux de résolution</p>
-              <p className="text-2xl font-bold text-gray-900">94.2%</p>
+              <p className="text-2xl font-bold text-gray-900">{tauxResolution}%</p>
               <p className="text-green-600 text-sm flex items-center mt-1">
                 <TrendingUp size={16} className="mr-1" />
-                +2.1% vs mois précédent
+                {evolutionResolution >= 0 ? "+" : ""}
+                {evolutionResolution}% vs mois précédent
               </p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
@@ -66,7 +68,7 @@ const Analytics: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        {/* <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Temps de première réponse</p>
@@ -96,16 +98,24 @@ const Analytics: React.FC = () => {
               <TrendingUp className="w-6 h-6 text-yellow-600" />
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-6 md:col-span-2 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tickets récurrents</p>
-              <p className="text-2xl font-bold text-gray-900">12%</p>
-              <p className="text-red-600 text-sm flex items-center mt-1">
-                <TrendingUp size={16} className="mr-1" />
-                +1.2% attention
+              <p className="text-2xl font-bold text-gray-900">{taux}%</p>
+              <p
+                className={`text-sm flex items-center mt-1 ${evolution > 0 ? "text-red-600" : "text-green-600"
+                  }`}
+              >
+                {evolution > 0 ? (
+                  <TrendingUp size={16} className="mr-1" />
+                ) : (
+                  <TrendingDown size={16} className="mr-1" />
+                )}
+                {evolution > 0 ? "+" : ""}
+                {evolution}% {evolution > 0 ? "attention" : "amélioration"}
               </p>
             </div>
             <div className="bg-red-100 p-3 rounded-lg">
@@ -129,19 +139,19 @@ const Analytics: React.FC = () => {
               <YAxis yAxisId="left" stroke="#666" />
               <YAxis yAxisId="right" orientation="right" stroke="#666" />
               <Tooltip />
-              <Line 
+              <Line
                 yAxisId="left"
-                type="monotone" 
-                dataKey="resolutionTime" 
-                stroke="#EF4444" 
+                type="monotone"
+                dataKey="resolutionTime"
+                stroke="#EF4444"
                 strokeWidth={3}
                 name="Temps résolution (jours)"
               />
-              <Line 
+              <Line
                 yAxisId="right"
-                type="monotone" 
-                dataKey="satisfaction" 
-                stroke="#10B981" 
+                type="monotone"
+                dataKey="satisfaction"
+                stroke="#10B981"
                 strokeWidth={3}
                 name="Satisfaction (%)"
               />
@@ -160,29 +170,29 @@ const Analytics: React.FC = () => {
               <XAxis dataKey="jour" stroke="#666" />
               <YAxis stroke="#666" />
               <Tooltip />
-              <Area 
-                type="monotone" 
-                dataKey="nouveau" 
-                stackId="1" 
-                stroke="#3B82F6" 
+              <Area
+                type="monotone"
+                dataKey="nouveau"
+                stackId="1"
+                stroke="#3B82F6"
                 fill="#3B82F6"
                 fillOpacity={0.6}
                 name="Nouveaux"
               />
-              <Area 
-                type="monotone" 
-                dataKey="encours" 
-                stackId="1" 
-                stroke="#F59E0B" 
+              <Area
+                type="monotone"
+                dataKey="encours"
+                stackId="1"
+                stroke="#F59E0B"
                 fill="#F59E0B"
                 fillOpacity={0.6}
                 name="En cours"
               />
-              <Area 
-                type="monotone" 
-                dataKey="ferme" 
-                stackId="1" 
-                stroke="#10B981" 
+              <Area
+                type="monotone"
+                dataKey="ferme"
+                stackId="1"
+                stroke="#10B981"
                 fill="#10B981"
                 fillOpacity={0.6}
                 name="Fermés"
@@ -193,69 +203,11 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Analyse par équipe */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Performance par Équipe
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Équipe Qualité (QA)</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Tickets traités</span>
-                <span className="font-medium">45</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Temps moyen</span>
-                <span className="font-medium">3.2 jours</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Satisfaction</span>
-                <span className="font-medium">4.7/5</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h4 className="font-medium text-green-900 mb-2">Équipe Opérationnelle (STO)</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Tickets traités</span>
-                <span className="font-medium">67</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Temps moyen</span>
-                <span className="font-medium">4.8 jours</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Satisfaction</span>
-                <span className="font-medium">4.4/5</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <h4 className="font-medium text-purple-900 mb-2">Administration</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Tickets traités</span>
-                <span className="font-medium">28</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Temps moyen</span>
-                <span className="font-medium">2.1 jours</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Satisfaction</span>
-                <span className="font-medium">4.8/5</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
+      <TeamPerformance/>
 
       {/* Recommandations */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+      {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Recommandations d'Amélioration
         </h3>
@@ -293,7 +245,7 @@ const Analytics: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
