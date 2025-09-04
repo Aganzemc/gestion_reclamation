@@ -1,25 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginForm from './components/Auth/LoginForm';
-import RegisterForm from './components/Auth/RegisterForm';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
 import TicketList from './components/Tickets/TicketList';
 import Analytics from './components/Analytics/Analytics';
 import UserManagement from './components/Users/UserManagement';
+import { LoginForm } from './components/login-form';
 
 function AuthenticatedApp() {
   const { isAuthenticated } = useAuth();
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [currentView, setCurrentView] = useState('dashboard');
 
   if (!isAuthenticated) {
-    return authMode === 'login' ? (
-      <LoginForm onSwitchToRegister={() => setAuthMode('register')} />
-    ) : (
-      <RegisterForm onSwitchToLogin={() => setAuthMode('login')} />
-    );
+    return <LoginForm  className="md:w-4/12 w-11/12 h-[350px] m-auto md:mt-[100px] mt-[50px]"/>
   }
 
   const renderCurrentView = () => {
