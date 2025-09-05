@@ -19,10 +19,12 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  ShieldCheck
 } from 'lucide-react';
 import { useTickets } from '../../hooks/useTickets';
 import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } from '../../lib/builTendanceTickets';
+import { TicketPriority, TicketStatus, TicketType } from '../../types/type';
 
 const Dashboard: React.FC = () => {
 
@@ -39,12 +41,25 @@ const Dashboard: React.FC = () => {
   const repartitionType = buildRepartitionType(tickets);
   const ticketsParAgent = buildTicketsParAgent(tickets);
 
+  const stats = {
+    urgent: tickets.filter(t => t.priority === TicketPriority.URGENT).length,
+    open: tickets.filter(t => t.status === TicketStatus.OPEN).length,
+    inProgress: tickets.filter(t => t.status === TicketStatus.IN_PROGRESS).length,
+    resolved: tickets.filter(t => t.status === TicketStatus.RESOLVED).length,
+    closed: tickets.filter(t => t.status === TicketStatus.CLOSED).length,
+    rejected: tickets.filter(t => t.status === TicketStatus.REJECTED).length,
+    incident: tickets.filter(t => t.type === TicketType.INCIDENT).length,
+    qualite: tickets.filter(t => t.type === TicketType.QUALITE).length,
+    operationnel: tickets.filter(t => t.type === TicketType.OPERATIONNEL).length,
+    unassigned: tickets.filter(t => !t.assignedTo || t.assignedTo.length === 0).length,
+  };
+
   useEffect(() => {
     getTickets()
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
         <div className="text-sm text-gray-500">
@@ -78,14 +93,14 @@ const Dashboard: React.FC = () => {
           icon={CheckCircle}
           color="green"
         />
-        {/* <KPICard
-          title="Temps Moyen (jours)"
-          value={data.tempsTraitement}
+        <KPICard
+          title="Tickets Opérationnels"
+          value={`${stats.operationnel}`}
           change="Stable"
           changeType="neutral"
           icon={TrendingUp}
           color="purple"
-        /> */}
+        />
       </div>
 
       {/* Charts Row */}
@@ -188,27 +203,33 @@ const Dashboard: React.FC = () => {
             <AlertTriangle className="w-6 h-6 text-red-600" />
             <div>
               <h4 className="font-semibold text-red-900">Tickets Critiques</h4>
-              <p className="text-red-700 text-sm">3 tickets critiques nécessitent une attention immédiate</p>
+              <p className="text-red-700 text-sm">
+                {stats.urgent} tickets urgents nécessitent une attention immédiate
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
           <div className="flex items-center space-x-3">
-            <Clock className="w-6 h-6 text-yellow-600" />
+            <AlertTriangle className="w-6 h-6 text-red-600" />
             <div>
-              <h4 className="font-semibold text-yellow-900">En Retard</h4>
-              <p className="text-yellow-700 text-sm">7 tickets dépassent le délai prévu</p>
+              <h4 className="font-semibold text-red-900">Tickets Incidents</h4>
+              <p className="text-red-700 text-sm">
+                {stats.incident} tickets liés aux incidents
+              </p>
             </div>
           </div>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
           <div className="flex items-center space-x-3">
-            <TrendingUp className="w-6 h-6 text-blue-600" />
+            <ShieldCheck className="w-6 h-6 text-blue-600" />
             <div>
-              <h4 className="font-semibold text-blue-900">Performance</h4>
-              <p className="text-blue-700 text-sm">Amélioration de 15% ce mois</p>
+              <h4 className="font-semibold text-blue-900">Tickets Qualité</h4>
+              <p className="text-blue-700 text-sm">
+                {stats.qualite} tickets liés à la qualité
+              </p>
             </div>
           </div>
         </div>

@@ -9,15 +9,16 @@ import { Button } from '../ui/button';
 interface TicketFormProps {
   ticket?: Ticket;
   onSave: (ticketData: Ticket) => void;
+  onclick?: () => void
 }
 
-const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
+const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
   const { users, getUsers } = useUserStore()
   const { addUser, removeUser, assignedUsers, } = useAssignments()
 
   useEffect(() => {
     getUsers()
-  }, [users])
+  }, [])
 
   const [formData, setFormData] = useState({
     id: ticket?.id,
@@ -40,6 +41,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
       description: formData.description,
       priority: formData.priority,
       type: formData.type,
+      status: formData.status,
       createdById: formData.createdById,
     });
   };
@@ -64,6 +66,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
           {ticket ? (
             <button
               className="text-blue-600 hover:text-blue-700"
+              onClick={onclick}
             >
               <Edit size={16} />
             </button>
@@ -137,8 +140,21 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
               </div>
             </div>
 
-
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as TicketStatus })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value={TicketStatus.OPEN}>Ouvert</option>
+                <option value={TicketStatus.IN_PROGRESS}>En cours</option>
+                <option value={TicketStatus.CLOSED}>Terminé</option>
+              </select>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -176,21 +192,6 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave }) => {
                   );
                 })}
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as TicketStatus })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value={TicketStatus.OPEN}>Ouvert</option>
-                <option value={TicketStatus.IN_PROGRESS}>En cours</option>
-                <option value={TicketStatus.CLOSED}>Terminé</option>
-              </select>
             </div>
 
             <div className="flex justify-end space-x-3 pt-6 border-t">

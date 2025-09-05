@@ -21,7 +21,7 @@ const UserManagement: React.FC = () => {
 
   useEffect(() => {
     getUsers();
-  }, [users])
+  }, [])
 
 
   const getRoleColor = (role: UserRole) => {

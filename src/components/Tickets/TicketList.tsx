@@ -284,6 +284,7 @@ const TicketList: React.FC = () => {
                           <TicketForm
                             ticket={ticket}
                             onSave={handleEditTicket}
+                            onclick={() => setEditingTicket(ticket)}
                           />
                         )
                       }
