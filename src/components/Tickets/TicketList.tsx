@@ -17,12 +17,14 @@ import { DownLoadPdf } from '../../lib/downloadPdf';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { format } from "date-fns";
 import { useAuth } from '../../context/AuthContext';
+import { useAssignmentStore } from '../../stores/assignmentStore';
 
 
 const TicketList: React.FC = () => {
-  const { tickets, getTickets, createTicket, updateTicket } = useTicketStore()
+  const { tickets, userTickets, getTickets, createTicket, updateTicket, getUserTickets } = useTicketStore()
   const { getSession, userId } = useAuthentication()
   // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
+  const { getUserAssignments, userAssignments } = useAssignmentStore()
   const { assignedUsers, createAssignment, reset } = useAssignments()
   const [_showForm, setShowForm] = useState(false);
   const [currentTicket, setCurrentTicket] = useState<Ticket | null>(null)
@@ -45,7 +47,16 @@ const TicketList: React.FC = () => {
   useEffect(() => {
     getTickets()
     getSession()
+    if (user) {
+      getUserTickets(user?.id!)
+      getUserAssignments(user?.id!)
+    }
   }, [])
+
+  const assignedTickets = Array.isArray(userAssignments)
+    ? userAssignments.map(ass => ass.ticket)
+    : [];
+
 
   const handleCreateTicket = async (ticketData: Ticket) => {
     console.log("my data", ticketData)
@@ -107,15 +118,16 @@ const TicketList: React.FC = () => {
     }
   };
 
-  const filteredTickets = Array.isArray(tickets)
-    ? tickets.filter(ticket => {
+  const [displayedTickets, setDisplayedTickets] = useState<Ticket[]>(userTickets)
+  const filteredTickets = Array.isArray(displayedTickets)
+    ? displayedTickets.filter(ticket => {
       return (
         (!filters.search ||
-          ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          ticket.id?.toLowerCase().includes(filters.search.toLowerCase())) &&
-        (!filters.status || ticket.status === filters.status) &&
-        (!filters.type || ticket.type === filters.type) &&
-        (!filters.priority || ticket.priority === filters.priority)
+          ticket.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
+          String(ticket.id)?.toLowerCase().includes(filters.search.toLowerCase())) &&
+        (!filters.status || ticket.status?.toLowerCase() === filters.status.toLowerCase()) &&
+        (!filters.type || ticket.type?.toLowerCase() === filters.type.toLowerCase()) &&
+        (!filters.priority || ticket.priority?.toLowerCase() === filters.priority.toLowerCase())
       );
     })
     : [];
@@ -124,13 +136,19 @@ const TicketList: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Gestion des Réclamations</h1>
-        {
-          user?.role !== "OBSERVER" && (
-            <TicketForm
-              onSave={handleCreateTicket}
-            />
-          )
-        }
+        <div className='flex gap-4'>
+          {user?.role === "ADMIN" && (<Button className='bg-yellow-800' onClick={() => setDisplayedTickets(tickets)}>Tout Tickets</Button>)}
+          <Button onClick={() => setDisplayedTickets(assignedTickets)}>Mes Tickets</Button>
+          <Button onClick={() => setDisplayedTickets(userTickets)}>Tickets Créé</Button>
+          {
+            (user?.role !== "OBSERVER" && user?.role !== "STO") && (
+              <TicketForm
+                onSave={handleCreateTicket}
+              />
+            )
+          }
+          
+        </div>
 
       </div>
 
@@ -280,7 +298,7 @@ const TicketList: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       {
-                        user?.role !== "OBSERVER" && (
+                        (user?.role !== "OBSERVER" && user?.role !== "STO") && (
                           <TicketForm
                             ticket={ticket}
                             onSave={handleEditTicket}
