@@ -30,45 +30,51 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarProps) {
   const { user } = useAuth();
 
+  const baseNav = [
+    {
+      id: "dashboard",
+      title: "Tableau de bord",
+      url: "#",
+      icon: LayoutDashboardIcon,
+    },
+    {
+      id: "tickets",
+      title: "Réclamations",
+      url: "#",
+      icon: Ticket,
+    },
+    {
+      id: "notifications",
+      title: "Notifications",
+      url: "#",
+      icon: Bell,
+    },
+    {
+      id: "analytics",
+      title: "Analytics",
+      url: "#",
+      icon: BarChartIcon,
+    },
+  ];
+
+  // conditionnel
+  if (user?.role === "ADMIN") {
+    baseNav.splice(2, 0, {
+      id: "users",
+      title: "Utilisateurs",
+      url: "#",
+      icon: Users,
+    });
+  }
+
   const data = {
     user: {
       name: user?.firstName,
       email: user?.email!,
       avatar: user?.firstName,
     },
-    navMain: [
-      {
-        id: 'dashboard',
-        title: "Tableau de bord",
-        url: "#",
-        icon: LayoutDashboardIcon,
-      },
-      {
-        id: 'tickets',
-        title: "Réclamations",
-        url: "#",
-        icon: Ticket,
-      },
-      {
-        id: 'users',
-        title: "Utilisateurs",
-        url: "#",
-        icon: Users,
-      },
-      {
-        id: 'notifications',
-        title: "Notifications",
-        url: "#",
-        icon: Bell,
-      },
-      {
-        id: 'analytics',
-        title: "Analytics",
-        url: "#",
-        icon: BarChartIcon,
-      }
-    ],
-  }
+    navMain: baseNav,
+  };
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

@@ -183,7 +183,7 @@ export const useTicketStore = create<TicketState>((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await axios.get(`${baseURL}/user/${userId}`);
-      set({ userTickets: response.data, loading: false });
+      set({ userTickets: response.data.tickets, loading: false });
     } catch (error: any) {
       set({ 
         error: error.response?.data?.message || 'Erreur lors de la récupération des tickets utilisateur',

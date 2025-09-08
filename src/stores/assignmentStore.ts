@@ -176,7 +176,7 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await axios.get(`${baseURL}/user/${userId}`);
-      const assignments = response.data;
+      const assignments = response.data.assignments;
       set({ userAssignments: assignments, loading: false });
       return assignments;
     } catch (error: any) {

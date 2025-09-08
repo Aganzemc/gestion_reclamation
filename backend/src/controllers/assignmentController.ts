@@ -274,14 +274,27 @@ export const assignmentController = {
           take: Number(limit),
           include: {
             ticket: {
-              select: {
-                id: true,
-                title: true,
-                status: true,
-                priority: true,
-                type: true,
-                createdAt: true
-              }
+              include: {
+                createdBy: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true
+                  }
+                },
+                assignedTo: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                      }
+                    }
+                  }
+                },
+              },
             }
           },
           orderBy: { assignedAt: 'desc' }
