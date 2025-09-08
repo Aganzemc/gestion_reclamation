@@ -9,6 +9,9 @@ import userRoutes from './routes/users';
 import notificationRoutes from './routes/notificationRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import assignmentRoutes from './routes/assignmentRoutes';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Création de l'application Express
 const app = express();
@@ -16,8 +19,6 @@ const app = express();
 // =====================================================
 // Middleware de sécurité
 // =====================================================
-
-// Helmet pour la sécurité des en-têtes HTTP
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -32,48 +33,24 @@ app.use(helmet({
 
 // Définir les options CORS
 const corsOptions: CorsOptions = {
-  origin: ["http://localhost:5173"], // liste des domaines autorisés (ex: ton frontend React/Next.js)
-  methods: ["GET", "POST", "PUT", "DELETE"], // méthodes autorisées
-  allowedHeaders: ["Content-Type", "Authorization"], // headers autorisés
-  credentials: true, // autorise cookies / authentification
+  origin: [
+    "http://localhost:5173",             // Développement local
+    "https://tonfrontend.hostinger.com",  // Remplace par ton vrai domaine Hostinger
+    "gestion-reclamation.vercel.app"  // Remplace par ton vrai domaine Hostinger
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 };
 
 // CORS
 app.use(cors(corsOptions));
 
-// // Limitation de taux (rate limiting)
-// const limiter = rateLimit({
-//   windowMs: config.rate_limit.window_ms,
-//   max: config.rate_limit.max_requests,
-//   message: {
-//     success: false,
-//     error: 'Trop de requêtes, veuillez réessayer plus tard',
-//     code: 'RATE_LIMIT_EXCEEDED'
-//   },
-//   standardHeaders: true,
-//   legacyHeaders: false,
-//   skip: (req) => {
-//     // Ne pas limiter les routes d'authentification
-//     return req.path.startsWith('/auth/login') || req.path.startsWith('/auth/refresh');
-//   }
-// });
-// app.use(limiter);
-
 // =====================================================
-// Middleware de parsing et logging
+// Middleware parsing et logging
 // =====================================================
-
-// Parser JSON avec limite de taille
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// app.use(express.json());
-
-// app.get("/", (req, res) => {
-//   res.send("🚀 API avec CORS activé !");
-// });
-
-// Logging des requêtes HTTP
 app.use(morgan('combined', {
   stream: {
     write: (message: string) => {
@@ -81,9 +58,9 @@ app.use(morgan('combined', {
     }
   }
 }));
-
+    
 // =====================================================
-// Routes de l'API
+// Routes
 // =====================================================
 
 // Route de santé (health check)
@@ -96,34 +73,15 @@ app.get('/health', (_req, res) => {
     environment: process.env["NODE_ENV"] || 'development'
   });
 });
-
-// Routes d'authentification
+   
+// Routes principales
 app.use('/api/auth', authRoutes);
-
-// Routes des utilisateurs
 app.use('/api/users', userRoutes);
-// app.get('/users', async (req, res) => {
-//   try {
-//     const users = await prisma.user.findMany({
-//       orderBy: { createdAt: 'desc' }
-//     });
-//     res.json(users);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erreur serveur' });
-//   }
-// });
-
-// Routes des notifications
 app.use('/api/notifications', notificationRoutes);
-
-// Routes des tickets
 app.use('/api/tickets', ticketRoutes);
-
-// Routes des assignations
 app.use('/api/assignments', assignmentRoutes);
 
-// Middleware de logging personnalisé
+// Middleware logging custom
 app.use((req, res, next) => {
   const start = Date.now();
 
@@ -136,10 +94,8 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// Middleware de gestion des erreurs globales
+// Gestion des erreurs globales
 // =====================================================
-
-// Gestion des erreurs 404
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -149,7 +105,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// Gestionnaire d'erreurs global
 app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Erreur non gérée:', {
     error: error.message,
@@ -159,32 +114,28 @@ app.use((error: any, req: express.Request, res: express.Response, _next: express
     ip: req.ip
   });
 
-  // Ne pas exposer les détails de l'erreur en production
-  // const isDevelopment = config.node_env === 'development';
-
-  // res.status(500).json({
-  //   success: false,
-  //   error: isDevelopment ? error.message : 'Erreur interne du serveur',
-  //   code: 'INTERNAL_ERROR',
-  //   ...(isDevelopment && { stack: error.stack })
-  // });
+  res.status(500).json({
+    success: false,
+    error: process.env["NODE_ENV"] === "development" ? error.message : 'Erreur interne du serveur',
+    code: 'INTERNAL_ERROR'
+  });
 });
 
 // =====================================================
 // Démarrage du serveur
 // =====================================================
-
 async function startServer() {
   try {
-    // Tester la connexion
     const dbConnected = await testConnection();
     if (!dbConnected) {
       logger.error("Impossible de se connecter à la base de données. Arrêt du serveur.");
       process.exit(1);
     }
 
-    const server = app.listen(4000, () => {
-      logger.info(`🚀 Serveur démarré sur le port 4000`);
+    const PORT = process.env["PORT"] || 4000;
+
+    const server = app.listen(PORT, () => {
+      logger.info(`🚀 Serveur démarré sur le port ${PORT}`);
     });
 
     const gracefulShutdown = async (signal: string) => {
@@ -209,5 +160,5 @@ async function startServer() {
   }
 }
 
-// Démarrer le serveur
+// Démarrer
 startServer();
