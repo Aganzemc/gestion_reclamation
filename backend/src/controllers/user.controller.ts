@@ -37,7 +37,7 @@ export const userController = {
   },
 
   // Obtenir tous les utilisateurs
-  async getUsers(req: Request, res: Response) {
+  async getUsers(_req: Request, res: Response) {
     try {
       const users = await prisma.user.findMany({
         select: {
