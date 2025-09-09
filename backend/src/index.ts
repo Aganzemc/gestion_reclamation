@@ -106,7 +106,7 @@ app.use('*', (req, res) => {
 });
 
 // Gestionnaire d'erreurs global
-app.use((error: any, req: express.Request, _res: express.Response, _next: express.NextFunction) => {
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Erreur non gérée:', {
     error: error.message,
     stack: error.stack,
