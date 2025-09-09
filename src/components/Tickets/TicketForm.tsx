@@ -5,6 +5,7 @@ import { useUserStore } from '../../stores/userStore';
 import { useAssignments } from '../../hooks/useAssignments';
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
+import { useAuth } from '../../context/AuthContext';
 
 interface TicketFormProps {
   ticket?: Ticket;
@@ -15,6 +16,7 @@ interface TicketFormProps {
 const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
   const { users, getUsers } = useUserStore()
   const { addUser, removeUser, assignedUsers, } = useAssignments()
+  const { user } = useAuth()
 
   useEffect(() => {
     getUsers()
@@ -156,43 +158,45 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Assignation
-              </label>
-              <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                {users.map((user) => {
-                  const isChecked =
-                    (assignedUsers.some((a) => a.userId === user.id) ||
-                      ticket?.assignedTo?.some((a) => a.userId === user.id)) ||
-                    false;
+            {user?.role === "QA" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Assignation
+                </label>
+                <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                  {users.map((user) => {
+                    const isChecked =
+                      (assignedUsers.some((a) => a.userId === user.id) ||
+                        ticket?.assignedTo?.some((a) => a.userId === user.id)) ||
+                      false;
 
-                  return (
-                    <label
-                      key={user.id}
-                      className="flex items-center gap-3 py-1 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) =>
-                          handleAssigneeChange(user.id!, e.target.checked)
-                        }
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.firstName} {user.lastName}
+                    return (
+                      <label
+                        key={user.id}
+                        className="flex items-center gap-3 py-1 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) =>
+                            handleAssigneeChange(user.id!, e.target.checked)
+                          }
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.firstName} {user.lastName}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {user.email} — {user.role}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {user.email} — {user.role}
-                        </div>
-                      </div>
-                    </label>
-                  );
-                })}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex justify-end space-x-3 pt-6 border-t">
               <DialogClose asChild>

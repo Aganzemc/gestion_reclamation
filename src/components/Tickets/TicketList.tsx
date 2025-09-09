@@ -44,13 +44,13 @@ const TicketList: React.FC = () => {
     });
   };
 
+
+
   useEffect(() => {
     getTickets()
     getSession()
-    if (user) {
-      getUserTickets(user?.id!)
-      getUserAssignments(user?.id!)
-    }
+    getUserTickets(user?.id!)
+    getUserAssignments(user?.id!)
   }, [])
 
   const assignedTickets = Array.isArray(userAssignments)
@@ -118,7 +118,11 @@ const TicketList: React.FC = () => {
     }
   };
 
-  const [displayedTickets, setDisplayedTickets] = useState<Ticket[]>(userTickets)
+  const [displayedTickets, setDisplayedTickets] = useState<Ticket[]>(assignedTickets)
+  // console.log("tickets", tickets)
+  // console.log("ass tickets", assignedTickets)
+  // console.log("displayed tickets", displayedTickets)
+  // console.log("user tickets", userTickets)
   const filteredTickets = Array.isArray(displayedTickets)
     ? displayedTickets.filter(ticket => {
       return (
@@ -139,15 +143,15 @@ const TicketList: React.FC = () => {
         <div className='flex gap-4'>
           {user?.role === "ADMIN" && (<Button className='bg-yellow-800' onClick={() => setDisplayedTickets(tickets)}>Tout Tickets</Button>)}
           <Button onClick={() => setDisplayedTickets(assignedTickets)}>Mes Tickets</Button>
-          <Button onClick={() => setDisplayedTickets(userTickets)}>Tickets Créé</Button>
+          {user?.role ==="QA" && (<Button onClick={() => setDisplayedTickets(userTickets)}>Tickets Créé</Button>)}
           {
-            (user?.role !== "OBSERVER" && user?.role !== "STO") && (
+            (user?.role === "QA") && (
               <TicketForm
                 onSave={handleCreateTicket}
               />
             )
           }
-          
+
         </div>
 
       </div>
@@ -298,7 +302,7 @@ const TicketList: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex space-x-2">
                       {
-                        (user?.role !== "OBSERVER" && user?.role !== "STO") && (
+                        (user?.role === "QA") && (
                           <TicketForm
                             ticket={ticket}
                             onSave={handleEditTicket}

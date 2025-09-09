@@ -42,7 +42,7 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "SUCCESS", 
-          message: `vous avez créé le ticket ${title} avec succé`, 
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a créé le ticket ${title}`, 
           userId: createdById
         }
       })
@@ -199,7 +199,7 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "INFO", 
-          message: `vous avez modifié un ticket ${title}`, 
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a modifié le ticket ${title}`, 
           userId: ticket.createdBy.id
         }
       })
@@ -233,7 +233,7 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "WARNING", 
-          message: `vous avez supprimé un ticket ${ticket.title}`, 
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a supprimé le ticket ${ticket.title}`, 
           userId: ticket.createdBy.id
         }
       })
@@ -269,7 +269,7 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "SUCCESS", 
-          message: `vous avez modifié le status du ticket ${ticket.title}`, 
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a modifié le status du ticket ${ticket.title}`, 
           userId: ticket.createdBy.id
         }
       })

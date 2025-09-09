@@ -52,6 +52,7 @@ const Dashboard: React.FC = () => {
     qualite: tickets.filter(t => t.type === TicketType.QUALITE).length,
     operationnel: tickets.filter(t => t.type === TicketType.OPERATIONNEL).length,
     unassigned: tickets.filter(t => !t.assignedTo || t.assignedTo.length === 0).length,
+
   };
 
   useEffect(() => {
@@ -94,9 +95,9 @@ const Dashboard: React.FC = () => {
           color="green"
         />
         <KPICard
-          title="Tickets Opérationnels"
-          value={`${stats.operationnel}`}
-          change="Stable"
+          title="Tickets Non Assigné"
+          value={`${stats.unassigned}`}
+          change=""
           changeType="neutral"
           icon={TrendingUp}
           color="purple"

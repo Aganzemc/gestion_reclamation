@@ -86,9 +86,10 @@ export const useTicketStore = create<TicketState>((set) => ({
   createTicket: async (ticketData) => {
     set({ loading: true, error: null });
     try {
+      console.log("ticket data", ticketData)
       const response = await axios.post(`${baseURL}/`, ticketData);
       const newTicket = response.data;
-      
+      console.log("after create ticket data", newTicket)
       set((state) => ({
         ticket: newTicket,
         tickets: [...state.tickets, newTicket],

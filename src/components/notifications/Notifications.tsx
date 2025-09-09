@@ -38,12 +38,13 @@ const getNotificationIcon = (type: NotificationType) => {
 
 const NotificationsPage = () => {
 
-    const { userNotifications: notifications, getUserNotifications } = useNotifications()
+    const { notifications, getUserNotifications, getNotifications } = useNotifications()
     const { user } = useAuth();
     
 
     useEffect(() => {
         getUserNotifications(user?.id!)
+        getNotifications()
     }, [])
 
     return (
