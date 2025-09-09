@@ -7,12 +7,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "vercel-build": "prisma generate && next build",
-    "db:seed": "ts-node src/scripts/seed.ts",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
-    
+    "db:seed": "ts-node src/scripts/seed.ts"
+
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
@@ -28,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "pg": "^8.11.3",
+    "serverless-http": "^4.0.0",
     "typeorm": "^0.3.26",
     "winston": "^3.11.0"
   },
