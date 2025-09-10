@@ -2,13 +2,14 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { Notification, NotificationType, User } from '../types/type';
+import { prodUrl } from '../services/constants';
 
 // Configuration Axios de base
 // const api = axios.create({
 //   baseURL: '/api/notifications',
 // });
 
-const baseURL = "http://localhost:4000/api/notifications"; 
+const baseURL = `${prodUrl}/api/notifications`; 
 
 // Intercepteur pour ajouter le token d'authentification
 // api.interceptors.request.use((config) => {

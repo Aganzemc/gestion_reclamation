@@ -2,13 +2,14 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { User, UserRole, UserStatus } from '../types/type';
+import { prodUrl } from '../services/constants';
 
 // Configuration Axios de base
 // const api = axios.create({
 //   baseURL: '/api/users',
 // });
 
-const baseURL = "http://localhost:4000/api/users"; 
+const baseURL = `${prodUrl}/api/users`; 
 
 // Intercepteur pour ajouter le token d'authentification
 // api.interceptors.request.use((config) => {

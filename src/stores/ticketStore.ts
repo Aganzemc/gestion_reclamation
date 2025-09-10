@@ -2,13 +2,14 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { Ticket, TicketStatus, TicketPriority, TicketType, TicketAssignment } from '../types/type';
+import { prodUrl } from '../services/constants';
 
 // Configuration Axios de base
 // const api = axios.create({
 //   baseURL: '/api/tickets',
 // });
 
-const baseURL = "http://localhost:4000/api/tickets"; 
+const baseURL = `${prodUrl}/api/tickets`; 
 
 // Intercepteur pour ajouter le token d'authentification
 // api.interceptors.request.use((config) => {
