@@ -8,10 +8,12 @@ import Analytics from './components/Analytics/Analytics';
 import UserManagement from './components/Users/UserManagement';
 import { LoginForm } from './components/login-form';
 import NotificationsPage from './components/notifications/Notifications';
+import { UserAccount } from './components/Users/UserAccount';
 
 function AuthenticatedApp() {
   const { isAuthenticated } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
+  const [clikedUserId, setClickedUserId] = useState<string>('')
 
   if (!isAuthenticated) {
     return <LoginForm  className="md:w-4/12 w-11/12 h-[350px] m-auto md:mt-[100px] mt-[50px]"/>
@@ -29,13 +31,15 @@ function AuthenticatedApp() {
         return <UserManagement />;
       case 'notifications':
         return <NotificationsPage/>
+      case 'user-account':
+        return <UserAccount id={clikedUserId}/>
       default:
         return <Dashboard />;
     }
   };
 
   return (
-    <Layout currentView={currentView} onViewChange={setCurrentView}>
+    <Layout currentView={currentView} setClickedUserId={setClickedUserId} onViewChange={setCurrentView}>
       {renderCurrentView()}
     </Layout>
   );

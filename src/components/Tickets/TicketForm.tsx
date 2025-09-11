@@ -58,7 +58,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
     }
   };
 
-
+ const operatingTeam = users.filter(user => user.role === "STO") || []
 
 
   return (
@@ -164,7 +164,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
                   Assignation
                 </label>
                 <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                  {users.map((user) => {
+                  {operatingTeam.map((user) => {
                     const isChecked =
                       (assignedUsers.some((a) => a.userId === user.id) ||
                         ticket?.assignedTo?.some((a) => a.userId === user.id)) ||

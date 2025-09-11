@@ -29,7 +29,8 @@ import { useAuth } from "../context/AuthContext"
 
 export function NavUser({
   user,
-  onViewChange
+  onViewChange,
+  setClickedUserId
 }: {
   user: {
     name?: string
@@ -37,9 +38,10 @@ export function NavUser({
     avatar?: string
   },
   onViewChange: (view: string) => void;
+  setClickedUserId: (id: string) => void
 }) {
   const { isMobile } = useSidebar()
-  const { logout } = useAuth();
+  const { user: currentUser, logout } = useAuth();
 
   return (
     <SidebarMenu>
@@ -85,7 +87,10 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                setClickedUserId(currentUser?.id!)
+                onViewChange("user-account")
+              }}>
                 <UserCircleIcon />
                 Account
               </DropdownMenuItem>

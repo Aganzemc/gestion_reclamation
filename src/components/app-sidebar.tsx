@@ -22,12 +22,13 @@ import { useAuth } from "../context/AuthContext"
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   onViewChange: (view: string) => void;
+  setClickedUserId: (id: string) => void
   currentView: string;
 }
 
 
 
-export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarProps) {
+export function AppSidebar({ onViewChange, setClickedUserId, currentView, ...props }: AppSidebarProps) {
   const { user } = useAuth();
 
   const baseNav = [
@@ -98,7 +99,7 @@ export function AppSidebar({ onViewChange, currentView, ...props }: AppSidebarPr
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter className="bg-white/80">
-        <NavUser user={data.user} onViewChange={onViewChange} />
+        <NavUser user={data.user} setClickedUserId={setClickedUserId} onViewChange={onViewChange} />
       </SidebarFooter>
     </Sidebar>
   )

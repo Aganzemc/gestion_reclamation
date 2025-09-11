@@ -20,6 +20,17 @@ const baseURL = `${prodUrl}/api/users`;
 //   return config;
 // });
 
+interface UpdateUserPassword {
+  currentPassword: string;
+  newPassword: string
+}
+
+interface UpdateUserPasswordRes {
+  success: boolean;
+  message: string
+  user?: User | null;
+}
+
 interface UserState {
   users: User[];
   currentUser: User | null;
@@ -30,10 +41,11 @@ interface UserState {
   getUsers: () => Promise<void>;
   getUserById: (id: string) => Promise<User>;
   createUser: (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => Promise<User>;
-  updateUser: (id: string, userData: Partial<User>) => Promise<User>;
+  updateUser: (id: string, userData: User) => Promise<User>;
   deleteUser: (id: string) => Promise<void>;
   clearError: () => void;
   setCurrentUser: (user: User | null) => void;
+  updateUserPassword: (id: string, data: UpdateUserPassword) => Promise<UpdateUserPasswordRes>
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -60,7 +72,9 @@ export const useUserStore = create<UserState>((set) => ({
     try {
       const response = await axios.get(`${baseURL}/${id}`);
       set({ loading: false });
+      set({ currentUser: response.data, loading: false });
       return response.data;
+
     } catch (error: any) {
       set({ 
         error: error.response?.data?.message || 'Erreur lors de la récupération de l\'utilisateur',
@@ -111,6 +125,18 @@ export const useUserStore = create<UserState>((set) => ({
         error: error.response?.data?.message || 'Erreur lors de la mise à jour de l\'utilisateur',
         loading: false 
       });
+      throw error;
+    }
+  },
+
+
+  updateUserPassword: async (id, data) => {
+    const updateData = {userId: id, ...data}
+    try {
+      const response = await axios.post(`${baseURL}/update-password`, updateData)
+      const updatedUserPassword = response.data;
+      return updatedUserPassword
+    } catch (error: any) {
       throw error;
     }
   },
