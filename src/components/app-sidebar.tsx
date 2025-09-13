@@ -40,7 +40,7 @@ export function AppSidebar({ onViewChange, setClickedUserId, currentView, ...pro
     },
     {
       id: "tickets",
-      title: "Réclamations",
+      title: "tickets",
       url: "#",
       icon: Ticket,
     },
