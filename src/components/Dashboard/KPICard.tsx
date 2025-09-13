@@ -35,11 +35,11 @@ const KPICard: React.FC<KPICardProps> = ({
   const [bgColor, cardBg] = colorClasses[color].split(' ');
 
   return (
-    <div className={`${cardBg} rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow`}>
+    <div className={`${cardBg} rounded-xl p-6 shadow-sm bg-gray-900 hover:shadow-md transition-shadow`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm font-medium text-gray-100 mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-100">{value}</p>
           {change && (
             <p className={`text-sm ${changeColors[changeType]} mt-1`}>
               {change}

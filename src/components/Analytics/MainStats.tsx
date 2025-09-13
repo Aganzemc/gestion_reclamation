@@ -9,11 +9,11 @@ export default function DashboardStats({ tickets }: { tickets: Ticket[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {/* Backlog actif */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Tickets non résolus</p>
-            <p className="text-2xl font-bold text-gray-900">{backlogCount}</p>
+            <p className="text-sm font-medium text-gray-100">Tickets non résolus</p>
+            <p className="text-2xl font-bold text-gray-100">{backlogCount}</p>
           </div>
           <div className="bg-blue-100 p-3 rounded-lg">
             <Activity className="w-6 h-6 text-blue-600" />
@@ -22,11 +22,11 @@ export default function DashboardStats({ tickets }: { tickets: Ticket[] }) {
       </div>
 
       {/* Tickets urgents */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Tickets urgents</p>
-            <p className="text-2xl font-bold text-gray-900">{urgentCount}</p>
+            <p className="text-sm font-medium text-gray-100">Tickets urgents</p>
+            <p className="text-2xl font-bold text-gray-100">{urgentCount}</p>
           </div>
           <div className="bg-red-100 p-3 rounded-lg">
             <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -35,13 +35,13 @@ export default function DashboardStats({ tickets }: { tickets: Ticket[] }) {
       </div>
 
       {/* Temps moyen de résolution */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm font-medium text-gray-100">
               Temps moyen résolution
             </p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-100">
               {avgResolution}h
             </p>
           </div>
@@ -52,11 +52,11 @@ export default function DashboardStats({ tickets }: { tickets: Ticket[] }) {
       </div>
 
       {/* Taux de réassignation */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">Réassignations</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-gray-100">Réassignations</p>
+            <p className="text-2xl font-bold text-gray-100">
               {reassignedRate}%
             </p>
           </div>

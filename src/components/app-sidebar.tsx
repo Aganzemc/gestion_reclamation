@@ -79,7 +79,7 @@ export function AppSidebar({ onViewChange, setClickedUserId, currentView, ...pro
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader className="py-6 bg-white/80">
+      <SidebarHeader className="py-6 bg-gray-900">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -87,18 +87,18 @@ export function AppSidebar({ onViewChange, setClickedUserId, currentView, ...pro
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <span className="font-semibold text-2xl">Gestion Tickets</span>
+                <span className="font-semibold text-2xl text-white">Gestion Tickets</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="bg-white/80">
+      <SidebarContent className="bg-white">
         <NavMain items={data.navMain} onViewChange={onViewChange} />
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter className="bg-white/80">
+      <SidebarFooter className="bg-gray-900">
         <NavUser user={data.user} setClickedUserId={setClickedUserId} onViewChange={onViewChange} />
       </SidebarFooter>
     </Sidebar>

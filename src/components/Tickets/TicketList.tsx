@@ -138,11 +138,11 @@ const TicketList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Gestion des Réclamations</h1>
+      <div className="flex items-center justify-between p-6 rounded bg-gray-900 mt-6">
+        <h1 className="text-2xl font-bold text-gray-100 uppercase">Gestion des Réclamations</h1>
         <div className='flex gap-4'>
-          {user?.role === "ADMIN" && (<Button className='bg-yellow-800' onClick={() => setDisplayedTickets(tickets)}>Tout Tickets</Button>)}
-          <Button onClick={() => setDisplayedTickets(assignedTickets)}>Mes Tickets</Button>
+          {user?.role === "ADMIN" && (<Button className='bg-white text-gray-900 hover:bg-gray-800 hover:text-gray-100' onClick={() => setDisplayedTickets(tickets)}>Tout Tickets</Button>)}
+          <Button className='bg-white text-gray-900 hover:bg-gray-800 hover:text-gray-100' onClick={() => setDisplayedTickets(assignedTickets)}>Mes Tickets</Button>
           {user?.role ==="QA" && (<Button onClick={() => setDisplayedTickets(userTickets)}>Tickets Créé</Button>)}
           {
             (user?.role === "QA") && (
@@ -157,7 +157,7 @@ const TicketList: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-lg p-6 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -206,13 +206,13 @@ const TicketList: React.FC = () => {
         </div>
 
         <div className="flex justify-between items-center mt-4">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm bg-gray-100 rounded-full px-6 py-2 text-gray-900 font-semibold">
             {filteredTickets.length} réclamation{filteredTickets.length > 1 ? 's' : ''} trouvée{filteredTickets.length > 1 ? 's' : ''}
           </div>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+              <button className="flex items-center space-x-2 text-gray-900 hover:text-gray-100 border rounded hover:bg-gray-900 px-6 py-2 transition-all ease-out">
                 <Download size={16} />
                 <span>Exporter</span>
               </button>
@@ -243,28 +243,28 @@ const TicketList: React.FC = () => {
       {/* Tickets Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
+          <table className="w-full border-none shadow-lg">
+            <thead className="bg-gray-900 text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Titre
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Priorité
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Assigné à
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Actions
                 </th>
               </tr>

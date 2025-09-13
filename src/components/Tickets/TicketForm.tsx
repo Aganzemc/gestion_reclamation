@@ -212,10 +212,10 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
               <DialogClose asChild>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center space-x-2"
                 >
                   <Save size={16} />
-                  <span>Enregistrer</span>
+                  <span className='text-gray-100'>Enregistrer</span>
                 </button>
               </DialogClose>
             </div>

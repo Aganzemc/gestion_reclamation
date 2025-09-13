@@ -40,7 +40,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave }) => {
               <Edit size={16} />
             </button>
           ) : (
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <Button className="bg-white hover:bg-gray-600 text-gray-900 hover:text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
               <Plus size={16} />
               <span>Nouvel utilisateur</span>
             </Button>
@@ -143,10 +143,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave }) => {
               <DialogClose asChild>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center space-x-2"
                 >
                   <Save size={16} />
-                  <span>Enregistrer</span>
+                  <span className='text-gray-100'>Enregistrer</span>
                 </button>
               </DialogClose>
             </div>

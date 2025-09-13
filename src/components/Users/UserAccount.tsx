@@ -87,18 +87,18 @@ export const UserAccount = ({ id }: { id: string }) => {
 
     return (
         <div className="container mx-auto p-6 max-w-6xl">
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-6 ">
                 {/* Sidebar avec informations générales */}
-                <div className="w-full md:w-1/3 space-y-6">
+                <div className="w-full md:w-1/3 space-y-6 ">
                     <Card>
-                        <CardHeader className="items-center">
+                        <CardHeader className="items-center bg-gray-900 rounded-sm">
                             <Avatar className="h-24 w-24 mb-4">
-                                <AvatarImage src="" />
-                                <AvatarFallback className="text-2xl">
+                                <AvatarImage src="" className="" />
+                                <AvatarFallback className="text-2xl text-gray-900">
                                     {getInitials(currentUser.firstName, currentUser.lastName)}
                                 </AvatarFallback>
                             </Avatar>
-                            <CardTitle className="text-center">
+                            <CardTitle className="text-center text-white">
                                 {currentUser.firstName} {currentUser.lastName}
                             </CardTitle>
                             <div className="flex gap-2 justify-center">
@@ -131,10 +131,10 @@ export const UserAccount = ({ id }: { id: string }) => {
                     </Card>
 
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Statistiques</CardTitle>
+                        <CardHeader className="bg-gray-900 rounded-sm">
+                            <CardTitle className="text-lg text-white">Statistiques</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 mt-4">
                             <div className="flex justify-between">
                                 <span className="text-sm">Tickets créés</span>
                                 <span className="font-medium">{currentUser.tickets?.length || 0}</span>
@@ -156,7 +156,7 @@ export const UserAccount = ({ id }: { id: string }) => {
                 {/* Contenu principal */}
                 <div className="w-full md:w-2/3">
                     <Tabs defaultValue="profile" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-3 bg-gray-900 text-white">
                             <TabsTrigger value="profile">Profil</TabsTrigger>
                             <TabsTrigger value="tickets">Tickets</TabsTrigger>
                             <TabsTrigger value="security">Sécurité</TabsTrigger>

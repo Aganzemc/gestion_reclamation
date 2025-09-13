@@ -27,10 +27,8 @@ import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } fr
 import { TicketPriority, TicketStatus, TicketType } from '../../types/type';
 
 const Dashboard: React.FC = () => {
-
-
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
-  const { getTickets, tickets } = useTickets()
+  const { getTickets, tickets } = useTickets();
 
   const totalTickets = tickets.length;
   const ticketsEnCours = tickets.filter(ticket => ticket.status === 'IN_PROGRESS').length;
@@ -52,25 +50,25 @@ const Dashboard: React.FC = () => {
     qualite: tickets.filter(t => t.type === TicketType.QUALITE).length,
     operationnel: tickets.filter(t => t.type === TicketType.OPERATIONNEL).length,
     unassigned: tickets.filter(t => !t.assignedTo || t.assignedTo.length === 0).length,
-
   };
 
   useEffect(() => {
-    getTickets()
-  }, [])
+    getTickets();
+  }, []);
 
   return (
-    <div className="space-y-6 mb-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
-        <div className="text-sm text-gray-500">
-          Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}
+    <div className="min-h-screen bg-white px-6 py-8 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-gray-900 w-full p-6 rounded">
+        <h1 className="text-2xl font-bold text-gray-100 uppercase">Tableau de bord</h1>
+        <div className="text-sm text-gray-100 font-semibold">
+          Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
+        <KPICard 
           title="Total Réclamations"
           value={totalTickets}
           change="+12% ce mois"
@@ -95,7 +93,7 @@ const Dashboard: React.FC = () => {
           color="green"
         />
         <KPICard
-          title="Tickets Non Assigné"
+          title="Non Assignés"
           value={`${stats.unassigned}`}
           change=""
           changeType="neutral"
@@ -105,24 +103,17 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
         {/* Tendance mensuelle */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Évolution Mensuelle
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={tendanceMensuelle}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="mois"
-                tick={{ fontSize: 12 }}
-                stroke="#666"
-              />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                stroke="#666"
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="mois" tick={{ fontSize: 12 }} stroke="#666" />
+              <YAxis tick={{ fontSize: 12 }} stroke="#666" />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#fff',
@@ -133,17 +124,17 @@ const Dashboard: React.FC = () => {
               <Line
                 type="monotone"
                 dataKey="tickets"
-                stroke="#3B82F6"
+                stroke="#2563eb"
                 strokeWidth={3}
-                dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Répartition par type */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Répartition par Type
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -156,7 +147,7 @@ const Dashboard: React.FC = () => {
                 label={({ name, percent }) =>
                   `${name} ${(percent! * 100).toFixed(0)}%`
                 }
-                outerRadius={80}
+                outerRadius={90}
                 fill="#8884d8"
                 dataKey="count"
               >
@@ -174,14 +165,13 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Tickets par agent */}
-      {/* Tickets par agent */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-2xl p-6 shadow-lg">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">
           Charge de Travail par Agent
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={ticketsParAgent}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="agent" tick={{ fontSize: 12 }} stroke="#666" />
             <YAxis tick={{ fontSize: 12 }} stroke="#666" />
             <Tooltip
@@ -191,15 +181,14 @@ const Dashboard: React.FC = () => {
                 borderRadius: "8px",
               }}
             />
-            <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-
       {/* Alertes et notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-3">
             <AlertTriangle className="w-6 h-6 text-red-600" />
             <div>
@@ -211,19 +200,19 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-3">
-            <AlertTriangle className="w-6 h-6 text-red-600" />
+            <AlertTriangle className="w-6 h-6 text-yellow-600" />
             <div>
-              <h4 className="font-semibold text-red-900">Tickets Incidents</h4>
-              <p className="text-red-700 text-sm">
+              <h4 className="font-semibold text-yellow-900">Tickets Incidents</h4>
+              <p className="text-yellow-700 text-sm">
                 {stats.incident} tickets liés aux incidents
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center space-x-3">
             <ShieldCheck className="w-6 h-6 text-blue-600" />
             <div>
@@ -240,44 +229,3 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
-
-// import { AppSidebar } from "../../components/app-sidebar"
-// import { ChartAreaInteractive } from "../../components/chart-area-interactive"
-// import { DataTable } from "../../components/data-table"
-// import { SectionCards } from "../../components/section-cards"
-// import { SiteHeader } from "../../components/site-header"
-// import {
-//   SidebarInset,
-//   SidebarProvider,
-// } from "../../components/ui/sidebar"
-
-// import data from "./data.json"
-
-// export default function Page() {
-//   return (
-//     <SidebarProvider
-//       style={
-//         {
-//           "--sidebar-width": "calc(var(--spacing) * 72)",
-//           "--header-height": "calc(var(--spacing) * 12)",
-//         } as React.CSSProperties
-//       }
-//     >
-//       <AppSidebar variant="inset" />
-//       <SidebarInset>
-//         <SiteHeader />
-//         <div className="flex flex-1 flex-col">
-//           <div className="@container/main flex flex-1 flex-col gap-2">
-//             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-//               <SectionCards />
-//               <div className="px-4 lg:px-6">
-//                 <ChartAreaInteractive />
-//               </div>
-//               <DataTable data={data} />
-//             </div>
-//           </div>
-//         </div>
-//       </SidebarInset>
-//     </SidebarProvider>
-//   )
-// }

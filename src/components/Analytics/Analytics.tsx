@@ -36,7 +36,9 @@ const Analytics: React.FC = () => {
   return (
     <div className="space-y-6 w-full pb-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Analyses et Indicateurs</h1>
+        <div className='w-full bg-gray-900 rounded p-6 mt-4 mb-2'>
+          <h1 className="text-2xl font-bold text-gray-100 uppercase">Analyses et Indicateurs</h1>
+        </div>
         <div className="flex space-x-2">
           {/* <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Exporter le rapport
@@ -50,7 +52,7 @@ const Analytics: React.FC = () => {
       {/* Graphiques détaillés */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Performance historique */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Évolution des Performances
           </h3>
@@ -82,7 +84,7 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Charge de travail hebdomadaire */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Charge de Travail Hebdomadaire
           </h3>

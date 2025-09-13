@@ -49,11 +49,13 @@ const NotificationsPage = () => {
 
     return (
         <div className="min-h-screen bg-white text-gray-900">
-            <div className="max-w-3xl mx-auto py-10 px-6">
-                <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Bell className="w-6 h-6" />
-                    Notifications
-                </h1>
+            <div className="w-full mx-auto py-10 px-6">
+                <div className="w-full p-6 rounded bg-gray-900 mb-8">
+                    <h1 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white uppercase">
+                        <Bell className="w-6 h-6" />
+                        Notifications
+                    </h1>
+                </div>
 
                 {notifications.length > 0 ? (
                     <div className="space-y-4">

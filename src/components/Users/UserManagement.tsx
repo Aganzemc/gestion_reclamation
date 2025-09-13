@@ -66,8 +66,8 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
+      <div className="w-full bg-gray-900 rounded shadow mt-4 mb-6 flex items-center justify-between p-6">
+        <h1 className="text-2xl font-bold text-gray-100 uppercase">Gestion des Utilisateurs</h1>
         {
           (currentUser?.role === "ADMIN") && (
             <UserForm
@@ -79,61 +79,61 @@ const UserManagement: React.FC = () => {
 
       {/* Statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-blue-100 p-3 rounded-lg">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Utilisateurs</p>
-              <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+              <p className="text-sm font-medium text-gray-100">Total Utilisateurs</p>
+              <p className="text-2xl font-bold text-gray-100">{users.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-green-100 p-3 rounded-lg">
               <Shield className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Actifs</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-100">Actifs</p>
+              <p className="text-2xl font-bold text-gray-100">
                 {users.filter(u => u.status === "ACTIVE").length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-red-100 p-3 rounded-lg">
               <Shield className="w-6 h-6 text-red-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Administrateurs</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-100">Administrateurs</p>
+              <p className="text-2xl font-bold text-gray-100">
                 {users.filter(u => u.role === UserRole.ADMIN).length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
           <div className="flex items-center space-x-3">
             <div className="bg-yellow-100 p-3 rounded-lg">
               <Users className="w-6 h-6 text-yellow-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Nouveaux ce mois</p>
-              <p className="text-2xl font-bold text-gray-900">3</p>
+              <p className="text-sm font-medium text-gray-100">Nouveaux ce mois</p>
+              <p className="text-2xl font-bold text-gray-100">3</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filtres */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-xl p-6 shadow-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -161,27 +161,27 @@ const UserManagement: React.FC = () => {
       </div>
 
       {/* Tableau des utilisateurs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
+          <table className="w-full border-none">
+            <thead className="bg-gray-900 text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Utilisateur
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Rôle
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Date de création
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium  uppercase tracking-wider">
                   Actions
                 </th>
               </tr>

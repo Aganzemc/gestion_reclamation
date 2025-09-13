@@ -31,8 +31,6 @@ export function LoginForm({
 
     try {
       const success = await signin(email, password);
-      console.log('Login attempt:', { email, password });
-      console.log('Login success:', success);
       if (!success) {
         setError('Email ou mot de passe incorrect');
       }
@@ -43,56 +41,60 @@ export function LoginForm({
     }
   };
 
-
   return (
-    <div className={cn("flex flex-col justify-center gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Bienvenue</CardTitle>
-          <CardDescription>
-            Connexion avec email et mot de passe
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-500" />
-              <span className="text-red-700 text-sm">{error}</span>
-            </div>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-6">
-              <div className="grid gap-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
+      <div className={cn("flex flex-col justify-center w-full max-w-md", className)} {...props}>
+        <Card className="shadow-2xl rounded-2xl border-0">
+          <CardHeader className="text-center bg-gray-900 w-full rounded-t-2xl mb-8">
+            <CardTitle className="text-4xl font-bold text-white ">Connexion</CardTitle>
+            <CardDescription className="text-gray-300">
+              Accédez à votre compte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <span className="text-red-700 text-sm">{error}</span>
+              </div>
+            )}
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-5">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="m@example.com"
+                    placeholder="exemple@email.com"
                     required
+                    className="rounded-lg border-gray-300 focus:border-gray-800 focus:ring-gray-700"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                  </div>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">Mot de passe</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required />
+                    required
+                    className="rounded-lg border-gray-300 focus:border-gray-800 focus:ring-gray-700"
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full rounded-lg bg-gray-900 hover:bg-gray-800 text-white font-semibold shadow-md py-4"
+                  disabled={loading}
+                >
                   {loading ? 'Connexion...' : 'Se connecter'}
                 </Button>
               </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
