@@ -294,7 +294,7 @@ const ActionProgressTable: React.FC = () => {
         <div className="flex items-center gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded hover:bg-gray-800">Exporter</button>
+              <button className="px-3 py-2 text-sm font-semibold text-gray-900 bg-transparent border border-gray-900 rounded-lg hover:bg-gray-900 hover:text-white transition-all duration-500 ease-in-out">Exporter</button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -313,8 +313,10 @@ const ActionProgressTable: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
-      <table className="min-w-full text-sm border border-gray-200 rounded-lg">
-        <thead className="text-white bg-gray-900 sticky top-0 z-10">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-none shadow-lg">
+            <thead className="bg-gray-900 text-white">
           <tr>
             <th className="px-4 py-3 text-left">N°</th>
             <th className="px-4 py-3 text-left">Titre Ticket</th>
@@ -363,7 +365,9 @@ const ActionProgressTable: React.FC = () => {
           )}
         </tbody>
       </table>
-      <p className="mt-3 text-xs text-gray-500">
+      </div>
+      </div>
+      <p className="mt-3 text-xs text-red-500 font-semibold">
         Remarque: en l'absence de dates d'échéance, les dates affichées sont la date de création et la dernière mise à jour du ticket.
       </p>
     </div>
