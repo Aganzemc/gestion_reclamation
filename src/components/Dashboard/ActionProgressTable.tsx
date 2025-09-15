@@ -294,7 +294,7 @@ const ActionProgressTable: React.FC = () => {
         <div className="flex items-center gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="px-3 py-2 text-sm font-semibold text-gray-900 bg-transparent border border-gray-900 rounded-lg hover:bg-gray-900 hover:text-white transition-all duration-500 ease-in-out">Exporter</button>
+              <button className="px-3 py-2 text-sm font-semibold text-gray-900 bg-transparent border border-gray-900 px-6 hover:bg-gray-900 hover:text-white transition-all duration-500 ease-in-out">Exporter</button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
