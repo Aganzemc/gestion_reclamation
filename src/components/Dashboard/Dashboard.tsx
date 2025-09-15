@@ -35,6 +35,42 @@ const Dashboard: React.FC = () => {
   const ticketsEnCours = tickets.filter(ticket => ticket.status === 'IN_PROGRESS').length;
   const ticketsClotures = tickets.filter(ticket => ticket.status === 'CLOSED').length;
 
+  // Real percentage changes (current month vs previous month)
+  const nowDate = new Date();
+  const currentMonth = nowDate.getMonth();
+  const currentYear = nowDate.getFullYear();
+  const prevMonthDate = new Date(currentYear, currentMonth - 1, 1);
+  const prevMonth = prevMonthDate.getMonth();
+  const prevYear = prevMonthDate.getFullYear();
+
+  const isSameMonth = (d?: Date) => d && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  const isPrevMonth = (d?: Date) => d && d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+
+  const createdAtDate = (t: any) => (t.createdAt ? new Date(t.createdAt) : undefined);
+  const updatedAtDate = (t: any) => (t.updatedAt ? new Date(t.updatedAt) : undefined);
+
+  const totalCurrent = tickets.filter(t => isSameMonth(createdAtDate(t))).length;
+  const totalPrev = tickets.filter(t => isPrevMonth(createdAtDate(t))).length;
+
+  const inProgressCurrent = tickets.filter(t => t.status === 'IN_PROGRESS' && isSameMonth(createdAtDate(t))).length;
+  const inProgressPrev = tickets.filter(t => t.status === 'IN_PROGRESS' && isPrevMonth(createdAtDate(t))).length;
+
+  // Closed counted by the month they were closed (updatedAt when status CLOSED)
+  const closedCurrent = tickets.filter(t => t.status === 'CLOSED' && isSameMonth(updatedAtDate(t))).length;
+  const closedPrev = tickets.filter(t => t.status === 'CLOSED' && isPrevMonth(updatedAtDate(t))).length;
+
+  function calcChange(currentValue: number, previousValue: number) {
+    const denom = previousValue === 0 ? (currentValue === 0 ? 1 : currentValue) : previousValue;
+    const pct = Math.round(((currentValue - previousValue) / denom) * 100);
+    const type = pct > 0 ? 'positive' : pct < 0 ? 'negative' : 'neutral';
+    const sign = pct > 0 ? '+' : '';
+    return { pct, type, label: `${sign}${pct}%` } as const;
+  }
+
+  const totalChange = calcChange(totalCurrent, totalPrev); // "ce mois"
+  const inProgressChange = calcChange(inProgressCurrent, inProgressPrev); // vs mois précédent
+  const closedChange = calcChange(closedCurrent, closedPrev); // "ce mois"
+
   // utilisation
   const tendanceMensuelle = buildTendanceMensuelle(tickets);
   const repartitionType = buildRepartitionType(tickets);
@@ -95,24 +131,24 @@ const Dashboard: React.FC = () => {
         <KPICard 
           title="Total Tickets"
           value={totalTickets}
-          change="+12% ce mois"
-          changeType="positive"
+          change={`${totalChange.label} ce mois`}
+          changeType={totalChange.type as any}
           icon={Ticket}
           color="blue"
         />
         <KPICard
           title="En Cours"
           value={ticketsEnCours}
-          change="-5% vs mois précédent"
-          changeType="negative"
+          change={`${inProgressChange.label} vs mois précédent`}
+          changeType={inProgressChange.type as any}
           icon={Clock}
           color="yellow"
         />
         <KPICard
           title="Clôturées"
           value={ticketsClotures}
-          change="+18% ce mois"
-          changeType="positive"
+          change={`${closedChange.label} ce mois`}
+          changeType={closedChange.type as any}
           icon={CheckCircle}
           color="green"
         />
