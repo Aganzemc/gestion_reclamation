@@ -30,8 +30,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
     priority: ticket?.priority ?? TicketPriority.MEDIUM, // valeur par défaut
     type: ticket?.type ?? TicketType.INCIDENT, // valeur par défaut
     createdById: ticket?.createdById ?? "",
-    createdAt: ticket?.createdAt,
-    updatedAt: ticket?.updatedAt,
+    createdAt: ticket?.startDate ?? ticket?.createdAt ?? undefined,
+    updatedAt: ticket?.endDate ?? ticket?.updatedAt ?? undefined,
     assignedTo: ticket?.assignedTo
   });
 
@@ -45,6 +45,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
       type: formData.type,
       status: formData.status,
       createdById: formData.createdById,
+      createdAt: formData.createdAt,
+      updatedAt: formData.updatedAt,
     });
   };
 
@@ -79,7 +81,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
             </Button>
           )}
         </DialogTrigger>
-        <DialogContent className="h-[450px] overflow-y-auto">
+        <DialogContent className="h-[520px] overflow-y-auto">
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,6 +141,31 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
                   <option value={TicketPriority.HIGH}>Haute</option>
                   <option value={TicketPriority.URGENT}>Critique</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date début
+                </label>
+                <input
+                  type="date"
+                  value={formData.createdAt ? new Date(formData.createdAt).toISOString().slice(0, 10) : ''}
+                  onChange={(e) => setFormData({ ...formData, createdAt: e.target.value ? new Date(e.target.value) : undefined })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date fin
+                </label>
+                <input
+                  type="date"
+                  value={formData.updatedAt ? new Date(formData.updatedAt).toISOString().slice(0, 10) : ''}
+                  onChange={(e) => setFormData({ ...formData, updatedAt: e.target.value ? new Date(e.target.value) : undefined })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
 

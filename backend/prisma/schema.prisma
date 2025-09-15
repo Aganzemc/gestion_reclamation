@@ -42,6 +42,8 @@ model Ticket {
   type        TicketType         @default(INCIDENT)
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
+  startDate   DateTime?          @map("start_date")
+  endDate     DateTime?          @map("end_date")
   createdBy   User               @relation("CreatedTickets", fields: [createdById], references: [id])
   createdById String             @map("created_by_id")
   assignedTo  TicketAssignment[]

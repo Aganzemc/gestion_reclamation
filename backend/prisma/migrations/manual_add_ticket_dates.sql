@@ -1,0 +1,3 @@
+﻿ALTER TABLE public.tickets 
+  ADD COLUMN IF NOT EXISTS start_date TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS end_date TIMESTAMP(3);

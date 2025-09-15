@@ -25,6 +25,7 @@ import {
 import { useTickets } from '../../hooks/useTickets';
 import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } from '../../lib/builTendanceTickets';
 import { TicketPriority, TicketStatus, TicketType } from '../../types/type';
+import ActionProgressTable from './ActionProgressTable';
 
 const Dashboard: React.FC = () => {
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
@@ -52,22 +53,45 @@ const Dashboard: React.FC = () => {
     unassigned: tickets.filter(t => !t.assignedTo || t.assignedTo.length === 0).length,
   };
 
+  // KPIs: On-time vs Late
+  const now = new Date();
+  const ticketsWithDue = tickets.filter(t => t.endDate);
+  const onTimeCount = ticketsWithDue.filter(t => {
+    const due = new Date(t.endDate!);
+    if (t.status === TicketStatus.CLOSED || t.status === TicketStatus.RESOLVED) {
+      const done = t.updatedAt ? new Date(t.updatedAt) : now;
+      return done <= due;
+    }
+    return now <= due; // pas encore dû
+  }).length;
+  const lateCount = ticketsWithDue.filter(t => {
+    const due = new Date(t.endDate!);
+    if (t.status === TicketStatus.CLOSED || t.status === TicketStatus.RESOLVED) {
+      const done = t.updatedAt ? new Date(t.updatedAt) : now;
+      return done > due;
+    }
+    return now > due;
+  }).length;
+  const denom = ticketsWithDue.length || 1;
+  const onTimePct = Math.round((onTimeCount / denom) * 100);
+  const latePct = Math.round((lateCount / denom) * 100);
+
   useEffect(() => {
     getTickets();
   }, []);
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 space-y-8">
+    <div className="min-h-screen px-6 py-8 space-y-8 bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between bg-gray-900 w-full p-6 rounded">
+      <div className="flex items-center justify-between w-full p-6 bg-gray-900 rounded">
         <h1 className="text-2xl font-bold text-gray-100 uppercase">Tableau de bord</h1>
-        <div className="text-sm text-gray-100 font-semibold">
+        <div className="text-sm font-semibold text-gray-100">
           Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KPICard 
           title="Total Réclamations"
           value={totalTickets}
@@ -102,11 +126,32 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
+      {/* KPI On-time vs Late */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+        <KPICard
+          title="% Fait en temps"
+          value={`${onTimePct}%`}
+          change={`${onTimeCount}/${ticketsWithDue.length || 0}`}
+          changeType="positive"
+          icon={ShieldCheck}
+          color="green"
+        />
+        <KPICard
+          title="% En retard"
+          value={`${latePct}%`}
+          change={`${lateCount}/${ticketsWithDue.length || 0}`}
+          changeType="negative"
+          icon={AlertTriangle}
+          color="red"
+        />
+      </div>
+      {/* Tableau de suivi */}
+      <ActionProgressTable />
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 ">
         {/* Tendance mensuelle */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="p-6 bg-white shadow-lg rounded-2xl">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800">
             Évolution Mensuelle
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -133,8 +178,8 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Répartition par type */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="p-6 bg-white shadow-lg rounded-2xl">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800">
             Répartition par Type
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -165,8 +210,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Tickets par agent */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      <div className="p-6 bg-white shadow-lg rounded-2xl">
+        <h3 className="mb-4 text-lg font-semibold text-gray-800">
           Charge de Travail par Agent
         </h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -187,43 +232,44 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Alertes et notifications */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="p-6 border border-red-200 shadow-sm bg-red-50 rounded-2xl">
           <div className="flex items-center space-x-3">
             <AlertTriangle className="w-6 h-6 text-red-600" />
             <div>
               <h4 className="font-semibold text-red-900">Tickets Critiques</h4>
-              <p className="text-red-700 text-sm">
+              <p className="text-sm text-red-700">
                 {stats.urgent} tickets urgents nécessitent une attention immédiate
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 shadow-sm">
+        <div className="p-6 border border-yellow-200 shadow-sm bg-yellow-50 rounded-2xl">
           <div className="flex items-center space-x-3">
             <AlertTriangle className="w-6 h-6 text-yellow-600" />
             <div>
               <h4 className="font-semibold text-yellow-900">Tickets Incidents</h4>
-              <p className="text-yellow-700 text-sm">
+              <p className="text-sm text-yellow-700">
                 {stats.incident} tickets liés aux incidents
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 shadow-sm">
+        <div className="p-6 border border-blue-200 shadow-sm bg-blue-50 rounded-2xl">
           <div className="flex items-center space-x-3">
             <ShieldCheck className="w-6 h-6 text-blue-600" />
             <div>
               <h4 className="font-semibold text-blue-900">Tickets Qualité</h4>
-              <p className="text-blue-700 text-sm">
+              <p className="text-sm text-blue-700">
                 {stats.qualite} tickets liés à la qualité
               </p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

@@ -5,6 +5,8 @@ import {
   Eye,
   Download,
   Search,
+  Check,
+  Trash2,
 } from 'lucide-react';
 import { useTicketStore } from '../../stores/ticketStore';
 import { useAuthentication } from '../../hooks/useAuth';
@@ -21,7 +23,7 @@ import { useAssignmentStore } from '../../stores/assignmentStore';
 
 
 const TicketList: React.FC = () => {
-  const { tickets, userTickets, getTickets, createTicket, updateTicket, getUserTickets } = useTicketStore()
+  const { tickets, userTickets, getTickets, createTicket, updateTicket, getUserTickets, deleteTicket, updateTicketStatus } = useTicketStore()
   const { getSession, userId } = useAuthentication()
   // const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
   const { getUserAssignments, userAssignments } = useAssignmentStore()
@@ -44,6 +46,16 @@ const TicketList: React.FC = () => {
     });
   };
 
+  const onValidateTicket = async (ticketId: string) => {
+    await updateTicketStatus(ticketId, TicketStatus.CLOSED)
+    await getTickets()
+  }
+
+  const onDeleteTicket = async (ticketId: string) => {
+    await deleteTicket(ticketId)
+    await getTickets()
+  }
+
 
 
   useEffect(() => {
@@ -61,9 +73,14 @@ const TicketList: React.FC = () => {
   const handleCreateTicket = async (ticketData: Ticket) => {
     console.log("my data", ticketData)
     const newTicket = await createTicket({
-      ...ticketData,
+      title: ticketData.title,
       description: ticketData.description ?? undefined,
-      createdById: userId!
+      priority: ticketData.priority,
+      type: ticketData.type,
+      status: ticketData.status,
+      createdById: userId!,
+      startDate: ticketData.startDate,
+      endDate: ticketData.endDate,
     })
 
     assignedUsers.forEach(user => {
@@ -79,8 +96,13 @@ const TicketList: React.FC = () => {
   const handleEditTicket = async (ticketData: Ticket) => {
     if (editingTicket) {
       const updatedTicket = await updateTicket(editingTicket.id!, {
-        ...ticketData,
-        description: ticketData.description ?? undefined
+        title: ticketData.title,
+        description: ticketData.description ?? undefined,
+        priority: ticketData.priority,
+        type: ticketData.type,
+        status: ticketData.status,
+        startDate: ticketData.startDate,
+        endDate: ticketData.endDate,
       })
       assignedUsers.forEach(user => {
         createAssignment({
@@ -300,16 +322,14 @@ const TicketList: React.FC = () => {
                     {new Date(ticket.createdAt!).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-2">
-                      {
-                        (user?.role === "QA") && (
-                          <TicketForm
-                            ticket={ticket}
-                            onSave={handleEditTicket}
-                            onclick={() => setEditingTicket(ticket)}
-                          />
-                        )
-                      }
+                    <div className="flex items-center space-x-2">
+                      {((user?.role === "QA") || (user?.role === "ADMIN") || (ticket.createdById === user?.id)) && (
+                        <TicketForm
+                          ticket={ticket}
+                          onSave={handleEditTicket}
+                          onclick={() => setEditingTicket(ticket)}
+                        />
+                      )}
                       <Drawer>
                         <DrawerTrigger asChild>
                           <button onClick={() => setCurrentTicket(ticket)} className="text-gray-600 hover:text-gray-700">
@@ -320,9 +340,39 @@ const TicketList: React.FC = () => {
                           {currentTicket && (
                             <>
                               {/* Header */}
-                              <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Détails de la réclamation</h2>
-                                <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h2 className="text-2xl font-bold text-gray-900">Détails de la réclamation</h2>
+                                  <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {((user?.role === "QA") || (user?.role === "ADMIN") || (currentTicket.createdById === user?.id)) && (
+                                    <TicketForm
+                                      ticket={currentTicket}
+                                      onSave={handleEditTicket}
+                                      onclick={() => setEditingTicket(currentTicket)}
+                                    />
+                                  )}
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <button title="Supprimer" className="px-2 py-1 text-red-600 hover:text-red-700">
+                                        <Trash2 size={16} />
+                                      </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Supprimer la réclamation ?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Cette action est irréversible. Confirmez la suppression du ticket "{currentTicket.title}".
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => onDeleteTicket(currentTicket.id!)}>Supprimer</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
                               </div>
 
                               {/* Infos principales */}
@@ -387,6 +437,18 @@ const TicketList: React.FC = () => {
                                     ? format(new Date(currentTicket.updatedAt), "dd/MM/yyyy HH:mm")
                                     : "-"}
                                 </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Date début:</span>{" "}
+                                  {currentTicket.startDate
+                                    ? format(new Date(currentTicket.startDate), "dd/MM/yyyy")
+                                    : "-"}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-700">Date fin:</span>{" "}
+                                  {currentTicket.endDate
+                                    ? format(new Date(currentTicket.endDate), "dd/MM/yyyy")
+                                    : "-"}
+                                </div>
                               </div>
 
                               {/* Assignations */}
@@ -419,6 +481,14 @@ const TicketList: React.FC = () => {
                         </DrawerContent>
 
                       </Drawer>
+                      <button
+                        title="Valider (Clôturer)"
+                        className="text-green-600 hover:text-green-700"
+                        onClick={() => onValidateTicket(ticket.id!)}
+                        disabled={ticket.status === TicketStatus.CLOSED}
+                      >
+                        <Check size={16} />
+                      </button>
                     </div>
                   </td>
                 </tr>

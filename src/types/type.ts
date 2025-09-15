@@ -69,6 +69,8 @@ export interface Ticket {
   type?: TicketType;
   createdAt?: Date;
   updatedAt?: Date;
+  startDate?: Date | null;
+  endDate?: Date | null;
   createdById: string;
   createdBy?: User;
   assignedTo?: TicketAssignment[];

@@ -6,7 +6,7 @@ export const ticketController = {
   // Créer un ticket
   async createTicket(req: Request, res: Response) {
     try {
-      const { title, description, priority, type, createdById } = req.body;
+      const { title, description, priority, type, createdById, startDate, endDate } = req.body;
       
       const ticket = await prisma.ticket.create({
         data: {
@@ -14,7 +14,9 @@ export const ticketController = {
           description,
           priority: priority || 'MEDIUM',
           type: type || 'INCIDENT',
-          createdBy: { connect: { id: createdById } }
+          createdBy: { connect: { id: createdById } },
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined
         },
         include: {
           createdBy: {
@@ -162,7 +164,7 @@ export const ticketController = {
   async updateTicket(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { title, description, status, priority, type } = req.body;
+      const { title, description, status, priority, type, startDate, endDate } = req.body;
       
       const ticket = await prisma.ticket.update({
         where: { id },
@@ -171,7 +173,9 @@ export const ticketController = {
           description,
           status,
           priority,
-          type
+          type,
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined
         },
         include: {
           createdBy: {

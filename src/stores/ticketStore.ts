@@ -281,4 +281,6 @@ export interface CreateTicketFormData {
   priority?: TicketPriority;
   type?: TicketType;
   createdById: string;
+  startDate?: Date;
+  endDate?: Date;
 }
