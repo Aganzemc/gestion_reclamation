@@ -84,7 +84,20 @@ export const userController = {
           status: true,
           createdAt: true,
           updatedAt: true,
-          assignedTickets: true,
+          assignedTickets: {
+            include: {
+              ticket: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  status: true,
+                  priority: true,
+                  createdAt: true
+                }
+              }
+            }
+          },
           tickets: {
             select: {
               id: true,

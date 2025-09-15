@@ -15,6 +15,8 @@ import { PasswordSecurity } from "./PasswordSecurity"
 export const UserAccount = ({ id }: { id: string }) => {
     const { getUserById, currentUser, updateUser } = useUsers()
     const [isEditing, setIsEditing] = useState(false)
+    const [showAllCreated, setShowAllCreated] = useState(false)
+    const [showAllAssigned, setShowAllAssigned] = useState(false)
     const [formData, setFormData] = useState<User>({
         firstName: "",
         lastName: "",
@@ -288,7 +290,9 @@ export const UserAccount = ({ id }: { id: string }) => {
                         <TabsContent value="tickets">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Vos tickets</CardTitle>
+                                    <CardTitle>
+                                        {currentUser.role === 'QA' ? 'Vos tickets (QA)' : currentUser.role === 'STO' ? 'Vos tickets (STO)' : 'Vos tickets'}
+                                    </CardTitle>
                                     <CardDescription>
                                         Liste des tickets que vous avez créés ou qui vous sont assignés
                                     </CardDescription>
@@ -300,9 +304,11 @@ export const UserAccount = ({ id }: { id: string }) => {
                                         <div className="space-y-4">
                                             {currentUser.tickets && currentUser.tickets.length > 0 && (
                                                 <div>
-                                                    <h3 className="text-lg font-medium mb-2">Tickets créés</h3>
+                                                    <h3 className="text-lg font-medium mb-2">
+                                                        {currentUser.role === 'QA' ? 'Tickets créés (QA)' : currentUser.role === 'STO' ? 'Tickets créés (STO)' : 'Tickets créés'}
+                                                    </h3>
                                                     <div className="space-y-2">
-                                                        {currentUser.tickets.slice(0, 5).map(ticket => (
+                                                        {(showAllCreated ? currentUser.tickets : currentUser.tickets.slice(0, 5)).map(ticket => (
                                                             <div key={ticket.id} className="p-3 border rounded-md">
                                                                 <div className="flex justify-between items-start">
                                                                     <div>
@@ -323,8 +329,8 @@ export const UserAccount = ({ id }: { id: string }) => {
                                                         ))}
                                                     </div>
                                                     {currentUser.tickets.length > 5 && (
-                                                        <Button variant="link" className="mt-2">
-                                                            Voir tous les tickets ({currentUser.tickets.length})
+                                                        <Button variant="link" className="mt-2" onClick={() => setShowAllCreated(v => !v)}>
+                                                            {showAllCreated ? 'Voir moins' : `Voir plus (${currentUser.tickets.length})`}
                                                         </Button>
                                                     )}
                                                 </div>
@@ -334,9 +340,15 @@ export const UserAccount = ({ id }: { id: string }) => {
 
                                             {currentUser.assignedTickets && currentUser.assignedTickets.length > 0 && (
                                                 <div>
-                                                    <h3 className="text-lg font-medium mb-2">Tickets assignés</h3>
+                                                    <h3 className="text-lg font-medium mb-2">
+                                                        {currentUser.role === 'QA'
+                                                            ? 'Tickets assignés (QA)'
+                                                            : currentUser.role === 'STO'
+                                                                ? 'Tickets assignés au STO connecté'
+                                                                : 'Tickets assignés'}
+                                                    </h3>
                                                     <div className="space-y-2">
-                                                        {currentUser.assignedTickets.slice(0, 5).map(assignment => (
+                                                        {(showAllAssigned ? currentUser.assignedTickets : currentUser.assignedTickets.slice(0, 5)).map(assignment => (
                                                             <div key={assignment.id} className="p-3 border rounded-md">
                                                                 <div className="flex justify-between items-start">
                                                                     <div>
@@ -357,8 +369,8 @@ export const UserAccount = ({ id }: { id: string }) => {
                                                         ))}
                                                     </div>
                                                     {currentUser.assignedTickets.length > 5 && (
-                                                        <Button variant="link" className="mt-2">
-                                                            Voir tous les tickets assignés ({currentUser.assignedTickets.length})
+                                                        <Button variant="link" className="mt-2" onClick={() => setShowAllAssigned(v => !v)}>
+                                                            {showAllAssigned ? 'Voir moins' : `Voir plus (${currentUser.assignedTickets.length})`}
                                                         </Button>
                                                     )}
                                                 </div>

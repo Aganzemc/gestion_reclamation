@@ -164,34 +164,25 @@ export const notificationController = {
   async getUserNotifications(req: Request, res: Response) {
     try {
       const { userId } = req.params;
-      const { isRead, type, page = 1, limit = 20 } = req.query;
-      
-      // Vérifier que l'utilisateur existe
-      const user = await prisma.user.findUnique({
-        where: { id: userId! }
-      });
-      
-      if (!user) {
-        return res.status(404).json({ error: 'Utilisateur non trouvé' });
-      }
-      
-      const where: any = { userId };
-      
-      if (isRead !== undefined) where.isRead = isRead === 'true';
-      if (type) where.type = type;
-      
+      const { page = 1, limit = 20 } = req.query;
+
       const skip = (Number(page) - 1) * Number(limit);
-      
+
       const [notifications, _total] = await Promise.all([
         prisma.notification.findMany({
-          where,
+          where: { userId },
           skip,
           take: Number(limit),
+          include: {
+            user: {
+              select: { id: true, firstName: true, lastName: true, email: true }
+            }
+          },
           orderBy: { createdAt: 'desc' }
         }),
-        prisma.notification.count({ where })
+        prisma.notification.count({ where: { userId } })
       ]);
-      
+
       return res.json(notifications);
     } catch (error) {
       console.error(error);

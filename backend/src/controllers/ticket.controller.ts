@@ -44,7 +44,7 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "SUCCESS", 
-          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a créé le ticket ${title}`, 
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a créé le ticket ${title}`,
           userId: createdById
         }
       })
