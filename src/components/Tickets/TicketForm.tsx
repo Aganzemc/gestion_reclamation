@@ -69,13 +69,14 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
         <DialogTrigger asChild>
           {ticket ? (
             <button
+              type="button"
               className="text-blue-600 hover:text-blue-700"
               onClick={onclick}
             >
               <Edit size={16} />
             </button>
           ) : (
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <Button type="button" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
               <Plus size={16} />
               <span>Nouvelle réclamation</span>
             </Button>

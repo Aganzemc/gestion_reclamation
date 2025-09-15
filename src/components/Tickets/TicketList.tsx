@@ -47,7 +47,16 @@ const TicketList: React.FC = () => {
   };
 
   const onValidateTicket = async (ticketId: string) => {
-    await updateTicketStatus(ticketId, TicketStatus.CLOSED)
+    try {
+      await updateTicketStatus(ticketId, TicketStatus.CLOSED)
+    } catch (e) {
+      try {
+        await updateTicket(ticketId, { status: TicketStatus.CLOSED })
+      } catch (err) {
+        console.error('Impossible de clôturer le ticket', err)
+        return
+      }
+    }
     await getTickets()
   }
 
@@ -323,7 +332,7 @@ const TicketList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center space-x-2">
-                      {((user?.role === "QA") || (user?.role === "ADMIN") || (ticket.createdById === user?.id)) && (
+                      {(user?.role === "QA") && (
                         <TicketForm
                           ticket={ticket}
                           onSave={handleEditTicket}
@@ -346,32 +355,34 @@ const TicketList: React.FC = () => {
                                   <p className="text-sm text-gray-500">Réf: {currentTicket.id}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {((user?.role === "QA") || (user?.role === "ADMIN") || (currentTicket.createdById === user?.id)) && (
+                                  {(user?.role === "QA") && (
                                     <TicketForm
                                       ticket={currentTicket}
                                       onSave={handleEditTicket}
                                       onclick={() => setEditingTicket(currentTicket)}
                                     />
                                   )}
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <button title="Supprimer" className="px-2 py-1 text-red-600 hover:text-red-700">
-                                        <Trash2 size={16} />
-                                      </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Supprimer la réclamation ?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Cette action est irréversible. Confirmez la suppression du ticket "{currentTicket.title}".
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => onDeleteTicket(currentTicket.id!)}>Supprimer</AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                  {user?.role === "QA" && (
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <button title="Supprimer" className="px-2 py-1 text-red-600 hover:text-red-700">
+                                          <Trash2 size={16} />
+                                        </button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Supprimer la réclamation ?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Cette action est irréversible. Confirmez la suppression du ticket "{currentTicket.title}".
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => onDeleteTicket(currentTicket.id!)}>Supprimer</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  )}
                                 </div>
                               </div>
 
@@ -481,14 +492,16 @@ const TicketList: React.FC = () => {
                         </DrawerContent>
 
                       </Drawer>
-                      <button
-                        title="Valider (Clôturer)"
-                        className="text-green-600 hover:text-green-700"
-                        onClick={() => onValidateTicket(ticket.id!)}
-                        disabled={ticket.status === TicketStatus.CLOSED}
-                      >
-                        <Check size={16} />
-                      </button>
+                      {user?.role === "QA" && ticket.status !== TicketStatus.CLOSED && (
+                        <button
+                          type="button"
+                          title="Clôturer le ticket"
+                          className="text-green-600 hover:text-green-700 cursor-pointer"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onValidateTicket(ticket.id!); }}
+                        >
+                          <Check size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
