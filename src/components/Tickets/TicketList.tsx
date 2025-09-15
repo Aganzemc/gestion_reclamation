@@ -170,7 +170,7 @@ const TicketList: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between p-6 rounded bg-gray-900 mt-6">
-        <h1 className="text-2xl font-bold text-gray-100 uppercase">Gestion des Réclamations</h1>
+        <h1 className="text-2xl font-bold text-gray-100 uppercase">Gestion des Tickets</h1>
         <div className='flex gap-4'>
           {(user?.role === "ADMIN" || user?.role === "OBSERVER") && (
             <Button className='bg-white text-gray-900 hover:bg-gray-800 hover:text-gray-100' onClick={() => setDisplayedTickets(tickets)}>
