@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KPICard 
-          title="Total Réclamations"
+          title="Total Tickets"
           value={totalTickets}
           change="+12% ce mois"
           changeType="positive"
