@@ -10,6 +10,14 @@ import { prodUrl } from '../services/constants';
 // });
 
 const baseURL = `${prodUrl}/api/tickets`; 
+// Ensure Authorization header is sent with requests to protected ticket endpoints
+const bootToken = (typeof window !== 'undefined') ? localStorage.getItem('authToken') : null;
+if (bootToken) {
+  (axios.defaults.headers as any).common = {
+    ...(axios.defaults.headers as any).common,
+    Authorization: `Bearer ${bootToken}`
+  };
+}
 const getCurrentUser = () => {
   try {
     const raw = localStorage.getItem('user');

@@ -2,9 +2,13 @@
 import express from 'express';
 import { ticketController } from '../controllers/ticket.controller';
 import { assignmentController } from '../controllers/assignmentController';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
-// authenticate 
+
+// Toutes les routes tickets nécessitent une authentification pour permettre le scoping par rôle
+router.use(authenticate);
+
 router.get('/', ticketController.getTickets);
 router.post('/', ticketController.createTicket);
 router.get('/:id', ticketController.getTicketById);

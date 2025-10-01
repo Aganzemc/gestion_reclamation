@@ -92,6 +92,8 @@ const Dashboard: React.FC = () => {
     unassigned: tickets.filter(t => !t.assignedTo || t.assignedTo.length === 0).length,
   };
 
+  const scopeLabel = isGlobalViewer ? 'Global' : (user?.role === 'STO' ? 'Vos tickets' : user?.role === 'QA' ? 'Tickets assignés' : 'Personnel');
+
   // KPIs: On-time vs Late
   const now = new Date();
   const ticketsWithDue = tickets.filter(t => t.endDate);
@@ -143,6 +145,7 @@ const Dashboard: React.FC = () => {
           changeType={totalChange.type as any}
           icon={Ticket}
           color="blue"
+          scopeLabel={scopeLabel}
         />
         <KPICard
           title="En Cours"
@@ -151,6 +154,7 @@ const Dashboard: React.FC = () => {
           changeType={inProgressChange.type as any}
           icon={Clock}
           color="yellow"
+          scopeLabel={scopeLabel}
         />
         <KPICard
           title="Clôturées"
@@ -159,6 +163,7 @@ const Dashboard: React.FC = () => {
           changeType={closedChange.type as any}
           icon={CheckCircle}
           color="green"
+          scopeLabel={scopeLabel}
         />
         <KPICard
           title="Non Assignés"
@@ -167,6 +172,7 @@ const Dashboard: React.FC = () => {
           changeType="neutral"
           icon={TrendingUp}
           color="purple"
+          scopeLabel={scopeLabel}
         />
       </div>
 
@@ -179,6 +185,7 @@ const Dashboard: React.FC = () => {
           changeType="positive"
           icon={ShieldCheck}
           color="green"
+          scopeLabel={scopeLabel}
         />
         <KPICard
           title="% En retard"
@@ -187,6 +194,7 @@ const Dashboard: React.FC = () => {
           changeType="negative"
           icon={AlertTriangle}
           color="red"
+          scopeLabel={scopeLabel}
         />
       </div>
       {/* Tableau de suivi */}
