@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-import app from "./app";
-import { testConnection, closePool } from "./lib/prisma";
-=======
 import express from 'express';
 import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { testConnection, closePool } from "./lib/prisma";
-import logger, { logRequest } from './utils/logger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import notificationRoutes from './routes/notificationRoutes';
@@ -38,9 +32,11 @@ app.use(helmet({
 // Définir les options CORS
 const corsOptions: CorsOptions = {
   origin: [
-    "http://localhost:5173",             // Développement local
-    "https://tonfrontend.hostinger.com",  // Remplace par ton vrai domaine Hostinger
-    "gestion-reclamation.vercel.app"  // Remplace par ton vrai domaine Hostinger
+    "http://localhost:5173",
+    "https://www.aserdinanga.com",
+    "http://gestion-reclamation.vercel.app",
+    "https://tonfrontend.hostinger.com",
+    "https://gestion-reclamation.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -58,7 +54,7 @@ app.use(express.json());
 app.use(morgan('combined', {
   stream: {
     write: (message: string) => {
-      logger.info(message.trim());
+      console.info(message.trim());
     }
   }
 }));
@@ -66,6 +62,16 @@ app.use(morgan('combined', {
 // =====================================================
 // Routes
 // =====================================================
+
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Hello World !!',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    environment: process.env["NODE_ENV"] || 'development'
+  });
+});
 
 // Route de santé (health check)
 app.get('/health', (_req, res) => {
@@ -91,7 +97,7 @@ app.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    logRequest(req, res, duration);
+    console.info(req, res, duration);
   });
 
   next();
@@ -111,7 +117,7 @@ app.use('*', (req, res) => {
 
 // Gestionnaire d'erreurs global
 app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error('Erreur non gérée:', {
+  console.info('Erreur non gérée:', {
     error: error.message,
     stack: error.stack,
     url: req.url,
@@ -125,69 +131,5 @@ app.use((error: any, req: express.Request, res: express.Response, _next: express
     code: 'INTERNAL_ERROR'
   });
 });
->>>>>>> ccbf412 (update backend)
 
-// =====================================================
-// Démarrage du serveur
-// =====================================================
-async function startServer() {
-  try {
-    const dbConnected = await testConnection();
-    if (!dbConnected) {
-<<<<<<< HEAD
-      console.info("Impossible de se connecter à la base de données. Arrêt du serveur.");
-      process.exit(1);
-    }
-
-    const PORT = process.env["PORT"] || 8080;
-
-    const server = app.listen(PORT, () => {
-      console.info(`🚀 Serveur démarré sur le port ${PORT}`);
-    });
-
-    const gracefulShutdown = async (signal: string) => {
-      console.info(`📴 Signal ${signal} reçu. Arrêt gracieux du serveur...`);
-=======
-      logger.error("Impossible de se connecter à la base de données. Arrêt du serveur.");
-      process.exit(1);
-    }
-
-    const PORT = process.env["PORT"] || 4000;
-
-    const server = app.listen(PORT, () => {
-      logger.info(`🚀 Serveur démarré sur le port ${PORT}`);
-    });
-
-    const gracefulShutdown = async (signal: string) => {
-      logger.info(`📴 Signal ${signal} reçu. Arrêt gracieux du serveur...`);
->>>>>>> ccbf412 (update backend)
-
-      server.close(async () => {
-        try {
-          await closePool();
-          process.exit(0);
-        } catch (error) {
-<<<<<<< HEAD
-          console.info("❌ Erreur lors de la fermeture Prisma:", error);
-=======
-          logger.error("❌ Erreur lors de la fermeture Prisma:", error);
->>>>>>> ccbf412 (update backend)
-          process.exit(1);
-        }
-      });
-    };
-
-    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-  } catch (error) {
-<<<<<<< HEAD
-    console.info("❌ Erreur lors du démarrage du serveur:", error);
-=======
-    logger.error("❌ Erreur lors du démarrage du serveur:", error);
->>>>>>> ccbf412 (update backend)
-    process.exit(1);
-  }
-}
-
-// Démarrer
-startServer();
+export default app

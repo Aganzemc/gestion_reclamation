@@ -2,6 +2,10 @@
 import { Request, Response } from 'express';
 import {prisma} from '../lib/prisma';
 import bcrypt from 'bcryptjs';
+<<<<<<< HEAD
+import { authService } from '../services/authServices';
+=======
+>>>>>>> ccbf412 (update backend)
 
 export const userController = {
   // Créer un utilisateur
@@ -84,6 +88,9 @@ export const userController = {
           status: true,
           createdAt: true,
           updatedAt: true,
+<<<<<<< HEAD
+          assignedTickets: true,
+=======
           assignedTickets: {
             include: {
               ticket: {
@@ -98,6 +105,7 @@ export const userController = {
               }
             }
           },
+>>>>>>> ccbf412 (update backend)
           tickets: {
             select: {
               id: true,
@@ -170,5 +178,108 @@ export const userController = {
     } catch (error) {
       res.status(400).json({ error: 'Erreur de suppression' });
     }
+<<<<<<< HEAD
+  },
+
+  async updateUserPassword(req: Request, res: Response) {
+    try {
+      // 1. Validation des données d'entrée
+      const { currentPassword, newPassword, userId } = req.body;
+
+      if (!currentPassword || !newPassword || !userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Tous les champs sont requis: currentPassword, newPassword, userId'
+        });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: 'Le nouveau mot de passe doit contenir au moins 8 caractères'
+        });
+      }
+
+      // 2. Récupération de l'utilisateur
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Utilisateur non trouvé'
+        });
+      }
+
+      if (!user.password) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cet utilisateur n\'a pas de mot de passe défini'
+        });
+      }
+
+      // 3. Vérification du mot de passe actuel
+      const isPasswordValid = authService.verifyPassword(currentPassword, user.password);
+      
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Mot de passe actuel incorrect'
+        });
+      }
+
+      // 4. Vérification que le nouveau mot de passe est différent de l'ancien
+      const isSamePassword = await authService.verifyPassword(newPassword, user.password);
+      
+      if (isSamePassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Le nouveau mot de passe doit être différent de l\'actuel'
+        });
+      }
+
+      // 5. Hash du nouveau mot de passe
+      const hashedNewPassword = await authService.hashPassword(newPassword);
+
+      // 6. Mise à jour du mot de passe dans la base de données
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { 
+          password: hashedNewPassword,
+          updatedAt: new Date() 
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true
+          // On exclut le mot de passe de la réponse
+        }
+      });
+
+      // 7. Réponse de succès
+      return res.status(200).json({
+        success: true,
+        message: 'Mot de passe mis à jour avec succès',
+        user: updatedUser
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du mot de passe:', error);
+      
+      return res.status(500).json({
+        success: false,
+        message: 'Erreur interne du serveur'
+      });
+    }
   }
+
+=======
+  }
+>>>>>>> ccbf412 (update backend)
 };

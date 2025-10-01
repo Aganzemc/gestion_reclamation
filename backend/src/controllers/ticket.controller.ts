@@ -1,12 +1,17 @@
 // controllers/ticketController.ts
 import { Request, Response } from 'express';
 import {prisma} from '../lib/prisma';
+import { applyScopedUserFilter, canViewGlobal } from '../utils/scope';
 
 export const ticketController = {
   // Créer un ticket
   async createTicket(req: Request, res: Response) {
     try {
+<<<<<<< HEAD
+      const { title, description, priority, type, createdById } = req.body;
+=======
       const { title, description, priority, type, createdById, startDate, endDate } = req.body;
+>>>>>>> ccbf412 (update backend)
       
       const ticket = await prisma.ticket.create({
         data: {
@@ -14,9 +19,13 @@ export const ticketController = {
           description,
           priority: priority || 'MEDIUM',
           type: type || 'INCIDENT',
+<<<<<<< HEAD
+          createdBy: { connect: { id: createdById } }
+=======
           createdBy: { connect: { id: createdById } },
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined
+>>>>>>> ccbf412 (update backend)
         },
         include: {
           createdBy: {
@@ -44,7 +53,11 @@ export const ticketController = {
       await prisma.notification.create({
         data: {
           type: "SUCCESS", 
+<<<<<<< HEAD
+          message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a créé le ticket ${title}`, 
+=======
           message: `${ticket.createdBy.firstName} ${ticket.createdBy.lastName} a créé le ticket ${title}`,
+>>>>>>> ccbf412 (update backend)
           userId: createdById
         }
       })
@@ -61,12 +74,17 @@ export const ticketController = {
     try {
       const { status, priority, type, userId, page = 1, limit = 10 } = req.query;
       
-      const where: any = {};
+      let where: any = {};
       
       if (status) where.status = status;
       if (priority) where.priority = priority;
       if (type) where.type = type;
       if (userId) where.createdById = userId;
+
+      // Scope: non-admin/observer users only see their own tickets
+      if (!canViewGlobal(req)) {
+        where = applyScopedUserFilter(where, req, 'createdById');
+      }
       
       const skip = (Number(page) - 1) * Number(limit);
       
@@ -164,7 +182,11 @@ export const ticketController = {
   async updateTicket(req: Request, res: Response) {
     try {
       const { id } = req.params;
+<<<<<<< HEAD
+      const { title, description, status, priority, type } = req.body;
+=======
       const { title, description, status, priority, type, startDate, endDate } = req.body;
+>>>>>>> ccbf412 (update backend)
       
       const ticket = await prisma.ticket.update({
         where: { id },
@@ -173,9 +195,13 @@ export const ticketController = {
           description,
           status,
           priority,
+<<<<<<< HEAD
+          type
+=======
           type,
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined
+>>>>>>> ccbf412 (update backend)
         },
         include: {
           createdBy: {
@@ -291,7 +317,9 @@ export const ticketController = {
       const { userId } = req.params;
       const { status, page = 1, limit = 10 } = req.query;
       
-      const where: any = { createdById: userId };
+      // Scope: if not global viewer, force to current user's tickets
+      const effectiveUserId = !canViewGlobal(req) ? (req as any).user?.id : userId;
+      const where: any = { createdById: effectiveUserId };
       if (status) where.status = status;
       
       const skip = (Number(page) - 1) * Number(limit);

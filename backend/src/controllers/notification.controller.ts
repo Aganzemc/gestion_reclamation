@@ -1,6 +1,7 @@
 // controllers/notificationController.ts
 import { Request, Response } from 'express';
 import {prisma} from '../lib/prisma';
+import { applyScopedUserFilter, canViewGlobal } from '../utils/scope';
 
 export const notificationController = {
   // Créer une notification
@@ -47,11 +48,16 @@ export const notificationController = {
     try {
       const { userId, type, isRead, page = 1, limit = 20 } = req.query;
       
-      const where: any = {};
+      let where: any = {};
       
       if (userId) where.userId = userId as string;
       if (type) where.type = type;
       if (isRead !== undefined) where.isRead = isRead === 'true';
+
+      // Scope: non-admin/observer see only their notifications
+      if (!canViewGlobal(req)) {
+        where = applyScopedUserFilter(where, req, 'userId');
+      }
       
       const skip = (Number(page) - 1) * Number(limit);
       
@@ -88,7 +94,11 @@ export const notificationController = {
       const { id } = req.params;
       
       const notification = await prisma.notification.findUnique({
+<<<<<<< HEAD
+        where: {id},
+=======
         where: { id },
+>>>>>>> ccbf412 (update backend)
         include: {
           user: {
             select: {
@@ -164,6 +174,39 @@ export const notificationController = {
   async getUserNotifications(req: Request, res: Response) {
     try {
       const { userId } = req.params;
+<<<<<<< HEAD
+      const { isRead, type, page = 1, limit = 20 } = req.query;
+      
+      // Scope: if not global viewer, force to current user
+      const effectiveUserId = !canViewGlobal(req) ? (req as any).user?.id : userId;
+
+      // Vérifier que l'utilisateur existe
+      const user = await prisma.user.findUnique({
+        where: { id: effectiveUserId! }
+      });
+      
+      if (!user) {
+        return res.status(404).json({ error: 'Utilisateur non trouvé' });
+      }
+      
+      const where: any = { userId };
+      
+      if (isRead !== undefined) where.isRead = isRead === 'true';
+      if (type) where.type = type;
+      
+      const skip = (Number(page) - 1) * Number(limit);
+      
+      const [notifications, _total] = await Promise.all([
+        prisma.notification.findMany({
+          where: { ...where, userId: effectiveUserId! },
+          skip,
+          take: Number(limit),
+          orderBy: { createdAt: 'desc' }
+        }),
+        prisma.notification.count({ where: { ...where, userId: effectiveUserId! } })
+      ]);
+      
+=======
       const { page = 1, limit = 20 } = req.query;
 
       const skip = (Number(page) - 1) * Number(limit);
@@ -183,6 +226,7 @@ export const notificationController = {
         prisma.notification.count({ where: { userId } })
       ]);
 
+>>>>>>> ccbf412 (update backend)
       return res.json(notifications);
     } catch (error) {
       console.error(error);
@@ -310,7 +354,7 @@ async getNotificationStats(req: Request, res: Response) {
   try {
     const { userId, startDate, endDate } = req.query;
     
-    const where: any = {};
+    let where: any = {};
     
     if (userId) where.userId = userId as string;
     
@@ -318,6 +362,11 @@ async getNotificationStats(req: Request, res: Response) {
       where.createdAt = {};
       if (startDate) where.createdAt.gte = new Date(startDate as string);
       if (endDate) where.createdAt.lte = new Date(endDate as string);
+    }
+    
+    // Scope: restrict to current user if not global viewer
+    if (!canViewGlobal(req)) {
+      where = applyScopedUserFilter(where, req, 'userId');
     }
     
     // const stats = await prisma.notification.groupBy({

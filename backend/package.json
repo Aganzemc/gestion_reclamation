@@ -7,7 +7,13 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+<<<<<<< HEAD
+    "postinstall": "prisma generate",
     "db:seed": "ts-node src/scripts/seed.ts"
+
+=======
+    "db:seed": "ts-node src/scripts/seed.ts"
+>>>>>>> ccbf412 (update backend)
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
@@ -37,7 +43,11 @@
     "@types/node": "^20.19.11",
     "@types/pg": "^8.10.9",
     "nodemon": "^3.0.2",
+<<<<<<< HEAD
+    "prisma": "^6.15.0",
+=======
     "prisma": "^6.16.1",
+>>>>>>> ccbf412 (update backend)
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.2"

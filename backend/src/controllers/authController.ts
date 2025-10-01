@@ -2,6 +2,10 @@
 import { Request, Response } from 'express';
 import { authService } from '../services/authServices';
 import { LoginCredentials, RegisterData } from '../interfaces/auth.interface';
+<<<<<<< HEAD
+import { prisma } from '../lib/prisma';
+=======
+>>>>>>> ccbf412 (update backend)
 
 export const authController = {
   // Inscription
@@ -56,9 +60,15 @@ export const authController = {
     }
   },
 
+<<<<<<< HEAD
+  // Rafraîchir le tokens 
+  async refreshToken(req: Request, res: Response) {
+    try {     
+=======
   // Rafraîchir le token
   async refreshToken(req: Request, res: Response) {
     try {
+>>>>>>> ccbf412 (update backend)
       const { refreshToken } = req.body;
 
       if (!refreshToken) {

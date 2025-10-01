@@ -12,6 +12,10 @@ router.post('/', userController.createUser);
 router.get('/:id', userController.getUserById);
 router.put('/:id', userController.updateUser);
 router.delete('/:id', userController.deleteUser);
+<<<<<<< HEAD
+router.post('/update-password', userController.updateUserPassword);
+=======
+>>>>>>> ccbf412 (update backend)
 
 // Routes pour les notifications d'un utilisateur spécifique
 router.get('/:userId/notifications', notificationController.getUserNotifications);

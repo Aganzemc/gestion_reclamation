@@ -1,6 +1,7 @@
 // controllers/assignmentController.ts
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
+import { applyScopedUserFilter, canViewGlobal } from '../utils/scope';
 
 export const assignmentController = {
   // Assigner un ticket à un utilisateur
@@ -86,10 +87,15 @@ export const assignmentController = {
     try {
       const { ticketId, userId, page = 1, limit = 20 } = req.query;
 
-      const where: any = {};
+      let where: any = {};
 
       if (ticketId) where.ticketId = ticketId as string;
       if (userId) where.userId = userId as string;
+
+      // Scope: non-admin/observer can only see their own assignments
+      if (!canViewGlobal(req)) {
+        where = applyScopedUserFilter(where, req, 'userId');
+      }
 
       const skip = (Number(page) - 1) * Number(limit);
 
@@ -142,6 +148,10 @@ export const assignmentController = {
     try {
       const { id } = req.params;
 
+<<<<<<< HEAD
+      
+=======
+>>>>>>> ccbf412 (update backend)
       const assignment = await prisma.ticketAssignment.findUnique({
         where: { id },
         include: {
@@ -182,7 +192,11 @@ export const assignmentController = {
 
   // Supprimer une assignation (désassigner)
   async deleteAssignment(req: Request, res: Response) {
+<<<<<<< HEAD
+    try {       
+=======
     try {
+>>>>>>> ccbf412 (update backend)
       const { id } = req.params;
 
       await prisma.ticketAssignment.delete({
@@ -256,9 +270,12 @@ export const assignmentController = {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
-      // Vérifier que l'utilisateur existe
+      // Scope: if not global viewer, force userId to current user
+      const effectiveUserId = !canViewGlobal(req) ? (req as any).user?.id : userId;
+
+      // Vérifier que l'utilisateur existe (effective)
       const user = await prisma.user.findUnique({
-        where: { id: userId! }
+        where: { id: effectiveUserId! }
       });
 
       if (!user) {
@@ -269,7 +286,7 @@ export const assignmentController = {
 
       const [assignments, total] = await Promise.all([
         prisma.ticketAssignment.findMany({
-          where: { userId: userId! },
+          where: { userId: effectiveUserId! },
           skip,
           take: Number(limit),
           include: {
@@ -299,7 +316,7 @@ export const assignmentController = {
           },
           orderBy: { assignedAt: 'desc' }
         }),
-        prisma.ticketAssignment.count({ where: { userId: userId! } })
+        prisma.ticketAssignment.count({ where: { userId: effectiveUserId! } })
       ]);
 
       return res.json({
@@ -352,7 +369,7 @@ export const assignmentController = {
     try {
       const { userId, startDate, endDate } = req.query;
 
-      const where: any = {};
+      let where: any = {};
 
       if (userId) where.userId = userId as string;
 
@@ -360,6 +377,11 @@ export const assignmentController = {
         where.assignedAt = {};
         if (startDate) where.assignedAt.gte = new Date(startDate as string);
         if (endDate) where.assignedAt.lte = new Date(endDate as string);
+      }
+
+      // Scope: restrict to current user if not global viewer
+      if (!canViewGlobal(req)) {
+        where = applyScopedUserFilter(where, req, 'userId');
       }
 
       const stats = await prisma.ticketAssignment.groupBy({
@@ -379,7 +401,11 @@ export const assignmentController = {
 
       // Formater les résultats
       const formattedStats = stats.map((stat: any) => {
+<<<<<<< HEAD
+        const user = users.find((u: any) => u.id === stat.userId);
+=======
         const user = users.find(u => u.id === stat.userId);
+>>>>>>> ccbf412 (update backend)
         return {
           userId: stat.userId,
           userName: user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu',
