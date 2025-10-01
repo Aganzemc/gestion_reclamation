@@ -23,4 +23,30 @@ export function canViewGlobal(req: Request): boolean {
   return isGlobalViewer(role);
 }
 
+// Ticket-specific scoping: STO -> createdById, QA -> assignedTo some userId
+export function buildTicketScopeWhere(req: Request, base: GenericWhere = {}): GenericWhere {
+  const role = (req as any).user?.role as string | undefined;
+  const currentUserId = (req as any).user?.id as string | undefined;
+
+  if (!role || !currentUserId) return base;
+
+  if (isGlobalViewer(role)) return base;
+
+  if (role === 'STO') {
+    return { ...base, createdById: currentUserId };
+  }
+
+  if (role === 'QA') {
+    return {
+      ...base,
+      assignedTo: {
+        some: { userId: currentUserId }
+      }
+    } as GenericWhere;
+  }
+
+  // Default: restrict to own created tickets
+  return { ...base, createdById: currentUserId };
+}
+
 
