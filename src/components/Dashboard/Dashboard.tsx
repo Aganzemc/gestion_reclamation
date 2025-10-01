@@ -26,10 +26,13 @@ import { useTickets } from '../../hooks/useTickets';
 import { buildRepartitionType, buildTendanceMensuelle, buildTicketsParAgent } from '../../lib/builTendanceTickets';
 import { TicketPriority, TicketStatus, TicketType } from '../../types/type';
 import ActionProgressTable from './ActionProgressTable';
+import { useAuth } from '../../context/AuthContext';
 
 const Dashboard: React.FC = () => {
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
   const { getTickets, tickets } = useTickets();
+  const { user } = useAuth();
+  const isGlobalViewer = user?.role === 'ADMIN' || user?.role === 'OBSERVER';
 
   const totalTickets = tickets.length;
   const ticketsEnCours = tickets.filter(ticket => ticket.status === 'IN_PROGRESS').length;
@@ -121,8 +124,13 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between w-full p-6 bg-gray-900 rounded">
         <h1 className="text-2xl font-bold text-gray-100 uppercase">Tableau de bord</h1>
-        <div className="text-sm font-semibold text-gray-100">
-          Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+        <div className="flex items-center gap-3">
+          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isGlobalViewer ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
+            {isGlobalViewer ? 'Vue globale' : 'Vue personnelle'}
+          </span>
+          <div className="text-sm font-semibold text-gray-100">
+            Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
+          </div>
         </div>
       </div>
 
@@ -245,27 +253,29 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tickets par agent */}
-      <div className="p-6 bg-white shadow-lg rounded-2xl">
-        <h3 className="mb-4 text-lg font-semibold text-gray-800">
-          Charge de Travail par Agent
-        </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={ticketsParAgent}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="agent" tick={{ fontSize: 12 }} stroke="#666" />
-            <YAxis tick={{ fontSize: 12 }} stroke="#666" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-              }}
-            />
-            <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Tickets par agent - réservé aux vues globales */}
+      {isGlobalViewer && (
+        <div className="p-6 bg-white shadow-lg rounded-2xl">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800">
+            Charge de Travail par Agent
+          </h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={ticketsParAgent}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="agent" tick={{ fontSize: 12 }} stroke="#666" />
+              <YAxis tick={{ fontSize: 12 }} stroke="#666" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                }}
+              />
+              <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Alertes et notifications */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

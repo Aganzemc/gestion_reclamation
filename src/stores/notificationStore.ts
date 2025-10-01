@@ -10,6 +10,15 @@ import { prodUrl } from '../services/constants';
 // });
 
 const baseURL = `${prodUrl}/api/notifications`; 
+const getCurrentUser = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+const isGlobalViewer = (role?: string) => role === 'ADMIN' || role === 'OBSERVER';
 
 // Intercepteur pour ajouter le token d'authentification
 // api.interceptors.request.use((config) => {
@@ -178,7 +187,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getUserNotifications: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${baseURL}/user/${userId}`);
+      const current = getCurrentUser();
+      const effectiveUserId = !isGlobalViewer(current?.role) ? current?.id : userId;
+      const response = await axios.get(`${baseURL}/user/${effectiveUserId}`);
       const notifications = response.data;
       
       // Calculer le nombre de notifications non lues
@@ -259,7 +270,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAllAsRead: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      await axios.patch(`${baseURL}/read-all`, { userId });
+      const current = getCurrentUser();
+      const effectiveUserId = !isGlobalViewer(current?.role) ? current?.id : userId;
+      await axios.patch(`${baseURL}/read-all`, { userId: effectiveUserId });
       
       set((state) => ({
         notifications: state.notifications.map(notification => 
@@ -283,7 +296,9 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   getUnreadCount: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${baseURL}/unread/count/${userId}`);
+      const current = getCurrentUser();
+      const effectiveUserId = !isGlobalViewer(current?.role) ? current?.id : userId;
+      const response = await axios.get(`${baseURL}/unread/count/${effectiveUserId}`);
       const count = response.data.count;
       
       set({ unreadCount: count, loading: false });

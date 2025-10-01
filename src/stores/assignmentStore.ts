@@ -10,6 +10,15 @@ import { prodUrl } from '../services/constants';
 // });
 
 const baseURL = `${prodUrl}/api/assignments`;
+const getCurrentUser = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+const isGlobalViewer = (role?: string) => role === 'ADMIN' || role === 'OBSERVER';
 
 // Intercepteur pour ajouter le token d'authentification
 // api.interceptors.request.use((config) => {
@@ -176,7 +185,9 @@ export const useAssignmentStore = create<AssignmentState>((set) => ({
   getUserAssignments: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${baseURL}/user/${userId}`);
+      const current = getCurrentUser();
+      const effectiveUserId = !isGlobalViewer(current?.role) ? current?.id : userId;
+      const response = await axios.get(`${baseURL}/user/${effectiveUserId}`);
       const assignments = response.data.assignments;
       set({ userAssignments: assignments, loading: false });
       return assignments;
