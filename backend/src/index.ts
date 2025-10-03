@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-import app from "./app";
-import { testConnection, closePool } from "./lib/prisma";
-=======
+
 import express from 'express';
 import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
@@ -125,7 +122,6 @@ app.use((error: any, req: express.Request, res: express.Response, _next: express
     code: 'INTERNAL_ERROR'
   });
 });
->>>>>>> ccbf412 (update backend)
 
 // =====================================================
 // Démarrage du serveur
@@ -134,20 +130,7 @@ async function startServer() {
   try {
     const dbConnected = await testConnection();
     if (!dbConnected) {
-<<<<<<< HEAD
-      console.info("Impossible de se connecter à la base de données. Arrêt du serveur.");
-      process.exit(1);
-    }
 
-    const PORT = process.env["PORT"] || 8080;
-
-    const server = app.listen(PORT, () => {
-      console.info(`🚀 Serveur démarré sur le port ${PORT}`);
-    });
-
-    const gracefulShutdown = async (signal: string) => {
-      console.info(`📴 Signal ${signal} reçu. Arrêt gracieux du serveur...`);
-=======
       logger.error("Impossible de se connecter à la base de données. Arrêt du serveur.");
       process.exit(1);
     }
@@ -160,18 +143,14 @@ async function startServer() {
 
     const gracefulShutdown = async (signal: string) => {
       logger.info(`📴 Signal ${signal} reçu. Arrêt gracieux du serveur...`);
->>>>>>> ccbf412 (update backend)
 
       server.close(async () => {
         try {
           await closePool();
           process.exit(0);
         } catch (error) {
-<<<<<<< HEAD
-          console.info("❌ Erreur lors de la fermeture Prisma:", error);
-=======
+
           logger.error("❌ Erreur lors de la fermeture Prisma:", error);
->>>>>>> ccbf412 (update backend)
           process.exit(1);
         }
       });
@@ -180,11 +159,8 @@ async function startServer() {
     process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
     process.on("SIGINT", () => gracefulShutdown("SIGINT"));
   } catch (error) {
-<<<<<<< HEAD
-    console.info("❌ Erreur lors du démarrage du serveur:", error);
-=======
+
     logger.error("❌ Erreur lors du démarrage du serveur:", error);
->>>>>>> ccbf412 (update backend)
     process.exit(1);
   }
 }

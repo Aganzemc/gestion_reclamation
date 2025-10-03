@@ -19,6 +19,8 @@ const UserManagement: React.FC = () => {
     setShowForm(false);
   };
 
+  console.log("user", users)
+
   useEffect(() => {
     getUsers();
   }, [])
@@ -54,7 +56,8 @@ const UserManagement: React.FC = () => {
   const toggleUserStatus = (userId: string) => {
     const currentStatus = users.find(u => u.id === userId)?.status;
     updateUser(userId, {
-      status: currentStatus === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE
+      status: currentStatus === UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE,
+      email: ''
     });
   };
 

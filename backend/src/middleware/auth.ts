@@ -1,11 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/authServices';
 import { JwtPayload } from '../types';
-<<<<<<< HEAD
-=======
+
 import logger from '../utils/logger';
 import { logSecurityEvent } from '../utils/logger';
->>>>>>> ccbf412 (update backend)
 
 // Extension de l'interface Request pour inclure l'utilisateur
 declare global {
@@ -85,11 +83,8 @@ export const requireRole = (requiredRoles: string[]) => {
       const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
       
       if (!hasRequiredRole) {
-<<<<<<< HEAD
-        console.info('Tentative d\'accès avec rôle insuffisant', {
-=======
+
         logSecurityEvent('Tentative d\'accès avec rôle insuffisant', {
->>>>>>> ccbf412 (update backend)
           userId: req.user.user_id,
           email: req.user.email,
           userRoles,
@@ -113,11 +108,8 @@ export const requireRole = (requiredRoles: string[]) => {
       next();
       
     } catch (error) {
-<<<<<<< HEAD
-      console.info('Erreur dans le middleware de vérification des rôles:', error);
-=======
+
       logger.error('Erreur dans le middleware de vérification des rôles:', error);
->>>>>>> ccbf412 (update backend)
       res.status(500).json({
         success: false,
         error: 'Erreur interne du serveur',
@@ -148,11 +140,8 @@ export const requirePermission = (resource: string, action: string) => {
       const hasPermission = checkPermission(userRoles, resource, action, req);
       
       if (!hasPermission) {
-<<<<<<< HEAD
-        console.info('Tentative d\'accès sans permission', {
-=======
+
         logSecurityEvent('Tentative d\'accès sans permission', {
->>>>>>> ccbf412 (update backend)
           userId: req.user.user_id,
           email: req.user.email,
           userRoles,
@@ -178,11 +167,8 @@ export const requirePermission = (resource: string, action: string) => {
       next();
       
     } catch (error) {
-<<<<<<< HEAD
-      console.info('Erreur dans le middleware de vérification des permissions:', error);
-=======
+
       logger.error('Erreur dans le middleware de vérification des permissions:', error);
->>>>>>> ccbf412 (update backend)
       res.status(500).json({
         success: false,
         error: 'Erreur interne du serveur',
@@ -279,11 +265,8 @@ export const requireOwnership = (resourceType: string) => {
       );
       
       if (!isOwner && !req.user.roles.includes('ADMIN')) {
-<<<<<<< HEAD
-        console.info('Tentative d\'accès à une ressource non possédée', {
-=======
+
         logSecurityEvent('Tentative d\'accès à une ressource non possédée', {
->>>>>>> ccbf412 (update backend)
           userId: req.user.user_id,
           resourceType,
           resourceId,
@@ -302,11 +285,8 @@ export const requireOwnership = (resourceType: string) => {
       next();
       
     } catch (error) {
-<<<<<<< HEAD
-      console.info('Erreur dans le middleware de vérification de propriétaire:', error);
-=======
+
       logger.error('Erreur dans le middleware de vérification de propriétaire:', error);
->>>>>>> ccbf412 (update backend)
       res.status(500).json({
         success: false,
         error: 'Erreur interne du serveur',
@@ -329,11 +309,8 @@ async function checkResourceOwnership(
     // Pour l'instant, retourner false par défaut
     return false;
   } catch (error) {
-<<<<<<< HEAD
-    console.info('Erreur lors de la vérification de propriétaire:', error);
-=======
+
     logger.error('Erreur lors de la vérification de propriétaire:', error);
->>>>>>> ccbf412 (update backend)
     return false;
   }
 }
@@ -377,11 +354,8 @@ export const validateInput = (schema: any) => {
       next();
       
     } catch (error) {
-<<<<<<< HEAD
-      console.info('Erreur dans le middleware de validation:', error);
-=======
+
       logger.error('Erreur dans le middleware de validation:', error);
->>>>>>> ccbf412 (update backend)
       res.status(500).json({
         success: false,
         error: 'Erreur interne du serveur',

@@ -2,10 +2,7 @@
 import { Request, Response } from 'express';
 import {prisma} from '../lib/prisma';
 import bcrypt from 'bcryptjs';
-<<<<<<< HEAD
 import { authService } from '../services/authServices';
-=======
->>>>>>> ccbf412 (update backend)
 
 export const userController = {
   // Créer un utilisateur
@@ -88,9 +85,6 @@ export const userController = {
           status: true,
           createdAt: true,
           updatedAt: true,
-<<<<<<< HEAD
-          assignedTickets: true,
-=======
           assignedTickets: {
             include: {
               ticket: {
@@ -105,7 +99,6 @@ export const userController = {
               }
             }
           },
->>>>>>> ccbf412 (update backend)
           tickets: {
             select: {
               id: true,
@@ -178,7 +171,6 @@ export const userController = {
     } catch (error) {
       res.status(400).json({ error: 'Erreur de suppression' });
     }
-<<<<<<< HEAD
   },
 
   async updateUserPassword(req: Request, res: Response) {
@@ -279,7 +271,5 @@ export const userController = {
     }
   }
 
-=======
+
   }
->>>>>>> ccbf412 (update backend)
-};

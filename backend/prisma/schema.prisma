@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-=======
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
->>>>>>> ccbf412 (update backend)
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,10 +12,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-<<<<<<< HEAD
-=======
 // Modèle User
->>>>>>> ccbf412 (update backend)
+
 model User {
   id              String             @id @default(uuid())
   email           String             @unique
@@ -30,25 +24,16 @@ model User {
   status          UserStatus         @default(ACTIVE)
   createdAt       DateTime           @default(now()) @map("created_at")
   updatedAt       DateTime           @updatedAt @map("updated_at")
-<<<<<<< HEAD
-  notifications   Notification[]
-  Session         Session[]
-  assignedTickets TicketAssignment[]
-  tickets         Ticket[]           @relation("CreatedTickets")
-=======
+
   tickets         Ticket[]           @relation("CreatedTickets")
   assignedTickets TicketAssignment[]
   notifications   Notification[]
   Session         Session[]
->>>>>>> ccbf412 (update backend)
 
   @@map("users")
 }
 
-<<<<<<< HEAD
-=======
 // Modèle Ticket
->>>>>>> ccbf412 (update backend)
 model Ticket {
   id          String             @id @default(uuid())
   title       String
@@ -58,30 +43,16 @@ model Ticket {
   type        TicketType         @default(INCIDENT)
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
-<<<<<<< HEAD
-  createdById String             @map("created_by_id")
-  assignedTo  TicketAssignment[]
-  createdBy   User               @relation("CreatedTickets", fields: [createdById], references: [id])
-=======
   startDate   DateTime?          @map("start_date")
   endDate     DateTime?          @map("end_date")
   createdBy   User               @relation("CreatedTickets", fields: [createdById], references: [id])
   createdById String             @map("created_by_id")
   assignedTo  TicketAssignment[]
->>>>>>> ccbf412 (update backend)
 
   @@map("tickets")
 }
 
-<<<<<<< HEAD
-model TicketAssignment {
-  id         String   @id @default(uuid())
-  ticketId   String   @map("ticket_id")
-  userId     String   @map("user_id")
-  assignedAt DateTime @default(now()) @map("assigned_at")
-  ticket     Ticket   @relation(fields: [ticketId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
-=======
+
 // Modèle d'assignation des tickets
 model TicketAssignment {
   id         String   @id @default(uuid())
@@ -90,29 +61,20 @@ model TicketAssignment {
   user       User     @relation(fields: [userId], references: [id])
   userId     String   @map("user_id")
   assignedAt DateTime @default(now()) @map("assigned_at")
->>>>>>> ccbf412 (update backend)
 
   @@unique([ticketId, userId])
   @@map("ticket_assignments")
 }
 
-<<<<<<< HEAD
-=======
 // Modèle de notification
->>>>>>> ccbf412 (update backend)
 model Notification {
   id        String           @id @default(uuid())
   type      NotificationType
   message   String
   isRead    Boolean          @default(false) @map("is_read")
   userId    String           @map("user_id")
-<<<<<<< HEAD
-  createdAt DateTime         @default(now()) @map("created_at")
-  user      User             @relation(fields: [userId], references: [id])
-=======
   user      User             @relation(fields: [userId], references: [id])
   createdAt DateTime         @default(now()) @map("created_at")
->>>>>>> ccbf412 (update backend)
 
   @@map("notifications")
 }
@@ -120,10 +82,7 @@ model Notification {
 model Session {
   id           String    @id @default(uuid())
   userId       String    @map("user_id")
-<<<<<<< HEAD
-=======
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
->>>>>>> ccbf412 (update backend)
   token        String    @unique
   refreshToken String    @unique @map("refresh_token")
   userAgent    String?   @map("user_agent")
@@ -131,18 +90,12 @@ model Session {
   expiresAt    DateTime  @map("expires_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   revokedAt    DateTime? @map("revoked_at")
-<<<<<<< HEAD
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-=======
->>>>>>> ccbf412 (update backend)
 
   @@map("sessions")
 }
 
-<<<<<<< HEAD
-=======
+
 // Enums
->>>>>>> ccbf412 (update backend)
 enum UserRole {
   ADMIN
   QA
