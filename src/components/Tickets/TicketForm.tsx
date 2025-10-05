@@ -30,6 +30,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
     priority: ticket?.priority ?? TicketPriority.MEDIUM, // valeur par défaut
     type: ticket?.type ?? TicketType.INCIDENT, // valeur par défaut
     createdById: ticket?.createdById ?? "",
+    startDate: ticket?.startDate ?? undefined,
+    endDate: ticket?.endDate ?? undefined,
     createdAt: ticket?.startDate ?? ticket?.createdAt ?? undefined,
     updatedAt: ticket?.endDate ?? ticket?.updatedAt ?? undefined,
     assignedTo: ticket?.assignedTo
@@ -45,6 +47,8 @@ const TicketForm: React.FC<TicketFormProps> = ({ ticket, onSave, onclick }) => {
       type: formData.type,
       status: formData.status,
       createdById: formData.createdById,
+      startDate: formData.createdAt,
+      endDate: formData.updatedAt,
       createdAt: formData.createdAt,
       updatedAt: formData.updatedAt,
     });

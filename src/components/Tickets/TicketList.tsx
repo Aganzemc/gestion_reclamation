@@ -336,7 +336,8 @@ const TicketList: React.FC = () => {
                     }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(ticket.createdAt!).toLocaleDateString()}
+                    {ticket.startDate ? new Date(ticket.startDate).toLocaleDateString():" - "} -
+                    {ticket.endDate ? new Date(ticket.endDate).toLocaleDateString() :" - "}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center space-x-2">
